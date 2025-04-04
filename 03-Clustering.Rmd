@@ -1,0 +1,184 @@
+# QC, Clustering, and Annotating with Seurat
+
+``` {r set_options, echo = FALSE}
+# This is a place to put any global options for creating this document
+```
+
+First, we will import the necessary Space Ranger output and perform some QC on the gene expression data. Then the gene expression and spatial data will be used to group (cluster) cells. Finally, we will annotate the clusters by cell type.
+
+Let's load the necessary libraries.
+
+```{r libraries}
+rm(list = ls()) # This clears your environment of any variables there. We do 
+#this to keep things tidy.
+library(ggplot2)
+library(ggpubr)
+library(cowplot)
+library(patchwork)
+library(dplyr)
+source("https://raw.githubusercontent.com/IanevskiAleksandr/sc-type/master/R/sctype_wrapper.R"); 
+library(HGNChelper)
+library(Seurat)
+
+# Easy to change variables for our project folder structure
+data_dir <- "datasets"
+figs_dir <- "figures"
+
+# This sets to the size of figures in inches
+two_panel = 3.5
+one_pnael = two_panel/2
+# We can do automatic figure numbering. We start with 2 as the flowchart is figure 1
+fig_num = 1
+```
+
+## Import and QC
+
+### Load in the data
+
+A Seurat object must first be constructed from the hdf5 file and spatial folder. This object is a special data type, holding all of the information about the sample and any additional information as a result of the analyses performed here. Image data can be read from the spatial folder via the `Read10X_Image` command and stored as a variable. This variable can then be used in the `Load10X_Spatial` command along with the hdf5 filename to load the data.
+
+```{r load10x}
+
+mouse_h5 <- "V1_Mouse_Brain_Sagittal_Anterior_Section_2_filtered_feature.h5"
+mouse_image <- Read10X_Image(image.dir = paste0(data_dir, "/mouse_brain_spatial"))
+brain_ant <- Load10X_Spatial(data.dir = data_dir, filename = mouse_h5, 
+                             assay = "Spatial", image = mouse_image)
+```
+
+### Trim and filter
+
+A few plots may be viewed for quick data exploration. The `VlnPlot` and `SpatialFeaturePlot` functions with the `nCount_Spatial` option display the distribution of spatial features in the sample. This demonstrates that molecular counts vary across the sample as a result of technical variations but also tissue type. We may want to remove feature counts that are exceptionally low or extremely high. Using the `PercentageFeaturesSet` command with a pattern matching “^mt-” (often the designation for mitochondrial RNA) and a `VlnPlot` selected for this feature allows us to visualize the percentage mitochondrial RNA counts in samples. It is suggested to eliminate cells with high amounts of mitochondrial RNA as this will contribute noise to expression data. There is no definitive rule or cutoffs for this step and largely depends on the researcher's evaluation of the data.
+
+```{r feature_check}
+brain_ant[["percent.mt"]] <- PercentageFeatureSet(brain_ant, pattern = "^mt-")
+figa <- VlnPlot(brain_ant, features = "nCount_Spatial", pt.size = 0.1) + 
+          NoLegend() + labs(title = "A. Features Violin Plot", y = "Count") +
+          theme(axis.title.x = element_blank(), axis.text.x = element_blank(), 
+                plot.title = element_text(size = 10), 
+                text = element_text(family = "Helvetica"))
+figb <- SpatialFeaturePlot(brain_ant, features = "nCount_Spatial") + 
+          labs(title = "Features Spatial Plot") +
+          theme(legend.position = "right", plot.title = element_text(size = 16),
+                text = element_text(family = "Helvetica"))
+figc <- VlnPlot(brain_ant, features = "percent.mt") + NoLegend() + 
+          labs(title = "B. Percent Mitochondrial Violin Plot", y = "Percentage") +
+          theme(axis.title.x = element_blank(), axis.text.x = element_blank(),
+                plot.title = element_text(size = 10),
+                text = element_text(family = "Helvetica"))
+wrap_plots(figa, figb)
+figc
+ggsave(filename = paste0(figs_dir, "/Figure_clust_", fig_num, ".png"), plot = wrap_plots(figa, figb, figc), units = "in", width = two_panel * (7/4), height = two_panel, dpi = 300)
+fig_num = fig_num + 1
+```
+
+Based on Figure 2, we use the `subset` function to select samples with a mitochondrial percent < 30 and a feature count < 50,000.
+
+```{r filter}
+brain_ant <- subset(brain_ant, 
+                    subset = percent.mt < 30 & nCount_Spatial < 50000)
+```
+
+### Normalization
+
+Next we need to normalize the data using SCTransform. Normalization is a common step to remove from samples technical variation that may interfere with downstream analsysis. Many normalization methods exist, most often log normalization is used with RNA-seq. Log normalization assumes all cells have the same number of RNA molecules, which is often far from the case and would therefore require more steps to account for this assumption.  Seurat has its own method called `SCTransform` which combines the normalization and correction steps into a single command.
+
+```{r sctransform}
+brain_ant <- SCTransform(brain_ant, assay = "Spatial", verbose = FALSE)
+```
+
+## Visualize Gene Expression
+
+Now that we have normalized gene expression, we can visualize this on the tissue sample image. Depending on the tissue under study and our goals, it may be interesting to pick a marker that can distinguish the anatomical structure of the sample. This plot overlays the expression of chosen genes over the provided tissue H&E image. We can see that the expression is not heterogeneous for all genes. In the next section, we will use a method to find out which expressions vary significantly across the tissue.
+
+Note, these images are ggplot images and can therefore be customized using ggplot options.
+
+```{r gene_exp}
+fig <- SpatialFeaturePlot(brain_ant, features = c("Hpca", "Ttr")) &
+        theme(plot.title = element_text(size = 16, hjust = "left"),
+                text = element_text(family = "Helvetica"))
+fig
+ggsave(filename = paste0(figs_dir, "/Figure_clust_", fig_num, ".png"), plot = fig,
+       units = "in", width = two_panel * (7/4), height = two_panel, dpi = 300)
+fig_num = fig_num + 1
+```
+
+## Dimention Reduction and Cluster
+
+When clustering, any number of variables can be considered. However, it is not necessary to include ALL variables as some contribute very little overall or even add noise. Dimension reduction pairs down the parameter list to only those that contribute meaningfully to the analysis. This is achieved here by using `RunPCA` on the transformed data. Now we can group cells using `FindNeighbors`, `FindClusters`, and `RunUMAP`. Briefly, Seurat uses a graph-based approach to clustering starting with a K-Nearest Neighbors graph based on the PCA space, then uses a Louvian algorithm to cluster the cells before a final non-linear dimensional reduction is performed with UMAP.
+
+```{r dim_red}
+brain_ant <- RunPCA(brain_ant, assay = "SCT", verbose = FALSE)
+brain_ant <- FindNeighbors(brain_ant, reduction = "pca", dims = 1:30)
+brain_ant <- FindClusters(brain_ant, verbose = FALSE)
+brain_ant <- RunUMAP(brain_ant, reduction = "pca", dims = 1:30)
+```
+
+## Visualizing Clusters
+
+There are a few options for visualization of our clusters. First, a traditional UMAP plot showing our clustering results with this `DimPlot` function (Figure 4a). `SpatialDimPlot` will show the distribution of identified clusters by overlaying them onto our tissue image. Giving `SpatialDimPlot` a few cluster identities allows us to highlight the location of selected clusters (Figure 4b).
+
+Again, these are ggplot objects that can be customized using the ggplot2 package.
+
+```{r cluster_vis}
+figa <- DimPlot(brain_ant, reduction = "umap", label = TRUE) +
+                labs(title = "A") +
+                theme(text = element_text(family = "Helvetica"),
+                      plot.title = element_text(face = "plain"))
+figb1 <-SpatialDimPlot(brain_ant, label = TRUE, label.size = 3) + 
+        labs(title = "B", fill = "Cluster") + 
+        theme(text = element_text(family = "Helvetica")) + NoLegend()
+fig4b2 <- SpatialDimPlot(brain_ant, 
+                        cells.highlight = CellsByIdentities(object = 
+                                        brain_ant, idents = c(0,8)),
+                        facet.highlight = TRUE, ncol = 1)
+figb <- wrap_plots(fig4b1, fig4b2)
+wrap_plots(figa, figb)
+ggsave(filename = paste0(figs_dir, "/Figure_clust", fig_num, ".png"), plot = wrap_plots(figa, figb, ncol = 1),
+       units = "in", width = two_panel * (7/4), height = two_panel * 2, dpi = 300)
+fig_num = fig_num + 1
+```
+
+## Spot Annotating
+
+A final step required is to annotate our clusters by assigning them cell types. This process is not single-cell resolution as our clusters consist of “spots” that contain several cells each (a characteristic of the 10X Visium platform used here). Deconvolution is needed to estimate individual cell types in each spot and is a separate step.
+
+While there are automated methods to do this, they are far from perfect, and the best way to annotate your samples is to have domain knowledge of markers that indicate cell types. If particular markers are known, expression can be viewed by cluster via a violin plot to assist in confirming. Several methods exist to perform this step. `SingleR` with `celldex` is a popular method. Another method is `Azimuth`. Here, we will use Sc-Type. The `run_sctype` function has built-in references if we provide “Brain” as the tissue type. Note that this reference is currently only for human tissue so the match will not be perfect for our data here. We can then show the new cluster assignments using `DimPlot` and `SpatialDimPlot` (Figure 5).
+
+```{r annotate}
+brain_ant <- run_sctype(brain_ant, assay = "SCT", scaled = TRUE,
+                     known_tissue_type="Brain", name="sctype_classification")
+figa <- DimPlot(brain_ant, group.by = "sctype_classification",
+                 pt.size = .25) + 
+                labs(title = "") +
+                 theme(text = element_text(family = "Helvetica", size = 10), 
+                       legend.position = "bottom", 
+                       legend.key.spacing.x = unit(0.25, "cm"),
+                       legend.key.spacing.y = unit(0.05, "cm"),
+                       legend.text = element_text(size = 8)) +
+                  coord_fixed(ratio =1)
+                  guides(color = guide_legend(nrow = 3,
+                                              override.aes = list(size = 2)))
+leg <- get_legend(figa)
+figb <- SpatialDimPlot(brain_ant, group.by= "sctype_classification") +
+                        NoLegend() + theme(plot.margin = margin(0, 0, 0, 0))
+fig <- ggarrange(figa, figb, nrow = 1, common.legend = TRUE, legend = "bottom", legend.grob = leg) + bgcolor("white")
+fig
+ggsave(filename = paste0(figs_dir, "/Figure_clust", fig_num, ".png"), plot = fig,
+       units = "in", width = two_panel * (7/4), height = two_panel, dpi = 300)
+fig_num = fig_num + 1
+```
+
+## Save the data
+
+Finally, we save the Seurat object with `saveRDS`. This file can be loaded again to add other annotations or create more figures without having to repeat the analysis. This same object will also serve as the starting point in subsequent steps.
+
+```{r save_data}
+saveRDS(brain_ant, file = paste0(data_dir, "/cluster_mouse_brain.rds"))
+saveRDS(fig_num, file = "clust_last_fig")
+```
+
+
+
+```{r session}
+sessionInfo()
+```

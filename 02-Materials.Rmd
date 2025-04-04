@@ -1,0 +1,37 @@
+# Materials
+
+``` {r set_options, echo = FALSE}
+# This is a place to put any global options for creating this document
+```
+
+## Computer Infrastructure
+
+As R will be the main working environment any compatible R operating system is sufficient. ST datasets can be quite large (10’s of GB) and saving data at several stages in the process may be desired. A multi-core processor for faster analysis may be beneficial at some steps, though not required. Finally, a fairly large amount of RAM may be required (>32GB). High Performance Computing services are available allowing users to upload their data to a cluster.
+
+## Software
+
+R is the coding environment in which the analysis will take place. R can be run via the command-line or used in the RStudio GUI. Packages can then be installed from within R. Version numbers used in this protocol are provided but these specific versions are not mandatory.
+
+[R (v4.4.2)](https://www.r-project.org/)
+[RStudio (RStudio 2024.12.0+467 "Kousa Dogwood")](https://posit.co/downloads/)
+[Seurat5 (v5.2.0)](https://satijalab.org/seurat/)
+[SPARK-X6](https://xzhoulab.github.io/SPARK/)
+[CellChat7 (v2.1.0)](https://github.com/jinworks/CellChat)
+
+## Collect necessary files
+
+### Space Ranger output
+
+After sequencing is completed, 10X Visium data will be provided as either base call files (.BCL) or FASTQ files, either of which can be used for input to 10X Genomics’ Space Ranger software. The output of Space Ranger is the input for our first analysis method so we will start there. Space Ranger provides a variety of files containing data and various metrics on the samples and sequencing run. We are interested in one file and one folder. We need the filtered feature-barcode matrices: hdf5 which holds the barcodes, features, and RNA count data. We will also need the spatial folder which contains data pertaining to the image that accompanies the sample. For a full picture of output file structure, see the [10X Genomics website](https://www.10xgenomics.com/support/software/space-ranger/latest/analysis/outputs/output-overview).
+
+### Reference data
+
+In order to mark cell types, we need to compare gene expression to that of already determined cells. This is frequently done with a reference dataset. While the software mentioned here has some reference sets built in, there are others available for download. These can be used after the clustering step for cell-type annotation and in deconvolution. Some annotated datasets are available from the [HuBMAP Consortium](https://azimuth.hubmapconsortium.org/).
+
+### Example datasets
+
+10X Genomics has freely available many datasets produced with their technology for users to download and analyze. These are useful for practice and learning. A mouse anterior brain dataset will be used in this chapter and is available [here](https://www.10xgenomics.com/datasets/mouse-brain-serial-section-2-sagittal-anterior-1-standard). NOTE: If you click this link from an institution's network you will be asked to sign up for an account. However, if you click this link from a home network, you won't have to provide an email to download a free dataset.
+
+```{r session}
+sessionInfo()
+```

@@ -1,3 +1,19 @@
+---
+title: "A Gentle Introduction to Spatial Transcriptomics Analysis"
+author: "Jessica Gillespie"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+documentclass: book
+bibliography: [book.bib, packages.bib]
+biblio-style: apalike
+link-citations: yes
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
 # Welcome!
 Future home of a simple, (hopefully) easy to understand spatial transcriptomics analysis pipeline for those who have never before done ST analysis.
 
@@ -19,4 +35,15 @@ There are several plans for the expansion of this protocol and they will be impl
 ## About this actual site
 These pages are all written in R using a package called [Bookdown](https://bookdown.org/). This package allows you to write R scripts that can then be converted into html files. These files can then be uploaded to GitHub and published via GitPages. The R files are available for download on GitHub if you want a "behind the scenes" view of these pages or you want to run them without copy/pasting code from these pages.
 
--J
+
+
+
+
+At the bottom of every chapter, you will see output from `sessionInfo()`. This is a command in R that prints a list of current R environment infomration as well as packages that were loaded at the time of creating this page. While it is not necessary if you are creating simple webpages like this one, it is provided as part of the protocol as it can be useful in troubleshooting.
+
+``` {r session}
+sessionInfo()
+```
+
+<!--chapter:end:index.Rmd-->
+

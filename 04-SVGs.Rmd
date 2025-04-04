@@ -1,0 +1,88 @@
+# Spatially Variable Genes (SVGs) Discovery with SPARK-X
+
+``` {r set_options, echo = FALSE}
+# This is a place to put any global options for creating this document
+```
+
+Now that we know our gene expression across the sample, are there genes whose expression varies across the sample in a significant way? This information can be used to study tissue structure, assess spatially-related gene expression, and determine cell-cell communication (although we will look at this specific topic in a later section). There are again many software options for this step using a variety of methods. Some use a Gaussian model (SpatialDE, nnSVG, SOMDE) that provide good results but scale significantly with dataset size. SPARK-X uses non-parametric methods to evaluate the independence of expression of a gene with location on the tissue. This approach requires significantly less RAM, even for large datasets.
+
+When finished with this step, we will have data on which genes vary in their expression across the tissue sample and a figure to show as much.
+
+As always, we first load the necessary libraries.
+
+```{r libraries}
+rm(list = ls()) # This clears your environment of any variables there. We do 
+#this to keep things tidy.
+library(ggpubr)
+library(patchwork)
+library(dplyr)
+library(SPARK)
+library(Seurat)
+
+# Easy to change variables for our project folder structure
+data_dir <- "datasets"
+figs_dir <- "figures"
+
+# This sets to the size of figures in inches
+two_panel = 3.5
+one_pnael = two_panel/2
+# We can do automatic figure numbering.
+fig_num = readRDS("clust_last_fig") + 1
+```
+
+## Importing and Preparing Data
+
+Using `readRDS` we can load in our saved Seurat object. Using `GetAssayData` and `GetTissueCoordinates` from Seurat, we can create two variables that contain the raw expression counts and the spatial coordinates respectively. Note if you have not yet removed mitochondrial genes, this should be performed before running this analysis.
+
+```{r load_data}
+brain_ant <- readRDS(paste0(data"/cluster_mouse_brain.rds")
+raw_counts <- GetAssayData(brain_ant, layer = "counts", assay = "Spatial")
+brain_coord <- GetTissueCoordinates(brain_ant)[,c("x","y")]
+```
+
+## Run SPARK-X
+
+With a single `sparkx` command, spatial information and gene expression are used to determine which gene’s expression differs by tissue area.
+
+```{r sparkx}
+brain_spark <- sparkx(raw_counts, brain_coord, option = 'mixture')
+```
+
+## Visualizing SVGs
+
+Now that we have a list of spatially variable genes, we can look at them across our tissue sample using the Seurat `SpatialFeaturePlot`. Here we look at the top 10 most significantly spatially variable genes (Figure 6).
+
+```{r SVG_plot}
+top10 <- brain_spark$res_mtest %>%
+          filter(between(adjustedPval, 0, 0.05)) %>%
+          top_n(-10, adjustedPval)
+
+fig <- SpatialFeaturePlot(brain_ant, features = c(rownames(top10)), 
+                           keep.scale = "all", combine = FALSE)
+fig[[1]] <- fig[[1]] + theme(legend.title = element_blank())
+leg <- ggpubr::get_legend(fig[[1]])
+for (i in 1:length(fig)) {
+  fig[[i]] <- fig[[i]] + NoLegend() + labs(title = rownames(top10[i,])) +
+                theme(text = element_text(family = "Helvetica"))
+}
+fig_2 <- wrap_plots(fig, ncol = 4) + plot_spacer() + leg
+fig_2
+
+ggsave(filename = paste0("Figure_svg_", fig_num, ".png"), plot = fig_2,
+       units = "in", width = two_panel * (7/4), height = two_panel, dpi = 300)
+fig_num <- fig_num + 1
+```
+
+## Save Data
+
+We can save our SPARK-X output to an rds file for quick loading to look at specific data or create new figures.
+
+```{r save}
+saveRDS(brain_spark, file = "datasets/svg_mouse_brain.rds")
+```
+
+
+```{r session}
+sessionInfo()
+```
+

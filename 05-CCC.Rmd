@@ -1,0 +1,196 @@
+# Cell-Cell Communication with CellChat
+
+``` {r set_options, echo = FALSE}
+# This is a place to put any global options for creating this document
+```
+
+Cells communicate by releasing and receiving molecular messages called ligands. Ligands bind to receptors, often found on cell surfaces. This binding then activates a reaction or pathway that leads to a cell function. Due to decades of research, we know which ligands typically bind to which receptors. Thanks to the scRNA-seq data for our sample we know which cells are expressing either the ligand or receptor in a canonical communication pair. As we also have spatial data available, we can use statistics to predict which cells are most likely communicating with one another based on ligand-receptor gene expression and physical distance from one another.
+
+One factor that heavily influences the results of any CCC analysis is the ligand-receptor database used. Indeed the same method can return two drastically different results merely by working from two different ligand-receptor pair lists. CellChat has its own database, CellChatDB, which is manually curated and takes into account things like subunit structure and regulatory pathways. The database is not exhaustive, however, and some ligand-receptor pairs may be missing. Users are able to update the database following the instructions [here](https://htmlpreview.github.io/?https://github.com/jinworks/CellChat/blob/master/tutorial/Update-CellChatDB.html])
+
+Another important factor is your annotations previously added in the Clustering step. CellChat will group samples by these annotations to determine which groups are potentially communicating with one another. Be sure your sample is well annotated to obtain the most accurate communication network.
+
+As always, let's load our libraries.
+
+```{r libraries}
+rm(list = ls())
+library(Seurat)
+library(CellChat)
+library(patchwork)
+
+# This sets to the size of figures in inches
+two_panel = 3.5
+one_pnael = two_panel/2
+# We can do automatic figure numbering.
+fig_num = 1
+```
+
+## Importing Data and Setting Computer Options
+
+Once again, we can load in the rds of the Seurat object from clustering. No SVG data is saved in the object from the previous section but it is not needed here. This step is very time intensive, potentially requiring several hours on a personal or office machine. Two options can speed up the process, however.
+
+R generally reserves only a small amount of RAM for calculations (~500MB) which is easily not enough for this step. We can set an option for the future.globals.maxSize to take advantage of a larger amount of RAM. The exact number will be system-dependent, here we used 32GB of RAM by providing the value 32000*1024*8. We can take advantage of a multicore processor by utilizing the future::plan function to set the number of cores we would like to use for CCC.
+
+```{r load_data}
+brain_ant <- readRDS("datasets/cluster_mouse_brain.rds")
+options(stringsAsFactors = FALSE)
+options(future.globals.maxSize = 32000*1024^2) # Here we decide to use 32GB RAM out of 48 available. You can set this to whatever number you want.
+future::plan("multisession", workers = 8) # This is the number of cores on which you want this to run. This will depend on how many cores your CPU has. We had 12 available and used 8 here.
+```
+
+## Preparing CellChat Object and Database
+
+There is a single command needed to create a CellChat object from a Seurat object. Preparing the database is somewhat more complicated. CellChat has two main databases, one for human and one for mouse. The databases contain a variety of communication modes including secretionary, cell-cell contact, and non-protein signaling. Depending on our cell types and desired research direction, these databases can be subset to focus only on specific interaction lists which may decrease processing time and simplify results.
+
+We also need to convert pixels in the H&E image to real-world measurements using the `scalefactors_json.json` file provided in the Space Ranger output and the spot size of the 10X Visium assay (usually 55μm). A CellChat object can then be created with the aptly named `createCellChat` function.
+
+
+```{r prep_data}
+spatial.locs = GetTissueCoordinates(brain_ant, scale = NULL, 
+                                    cols = c("imagerow", "imagecol"))
+spatial.locs <- spatial.locs[,c(1,2)]
+scalefactors = jsonlite::fromJSON(txt = file.path("datasets/mouse_brain_spatial/",
+                                                  'scalefactors_json.json'))
+spot.size = 55 # The current spot size (um) in 10X Visium. This is assay specific and you should double check this value!
+conversion.factor = spot.size/scalefactors$spot_diameter_fullres
+spatial.factors = data.frame(ratio = conversion.factor, tol = spot.size/2)
+d.spatial <- computeCellDistance(coordinates = spatial.locs, 
+                                 ratio = spatial.factors$ratio, 
+                                 tol = spatial.factors$tol)
+min(d.spatial[d.spatial!=0]) # this value should approximately equal 100um for 10X Visium data
+
+# create the CellChat object
+cellChat <- createCellChat(brain_ant, group.by = "sctype_classification",
+                           assay = "SCT", coordinates = spatial.locs,
+                           spatial.factors = spatial.factors)
+
+CellChatDB <- CellChatDB.mouse
+# use all CellChatDB for cell-cell communication analysis. We do not suggest to use it in this way because CellChatDB v2 includes "Non-protein Signaling" (i.e., metabolic and synaptic signaling) that can be only estimated from gene expression data.
+CellChatDB.use <- CellChatDB
+# Or optional subsetting
+# CellChatDB.use <- subsetDB(CellChatDB, search = "Secreted Signaling", key = "annotation")
+# set the used database in the object
+cellChat@DB <- CellChatDB.use
+```
+
+## Run CellChat
+
+Before finding all ligand-receptor pairs, over-expressed genes and interactions are found to infer the cell state-specific communications using `identifyOverExpressedGenes` and `identifyOverExpressedInteractions` respectively. If the sequencing depth is shallow, we can use `smoothData` to smooth genes' expressions based on neighbors' validated and high-confidence protein-protein network. If smoothing is used, the parameter `raw = FALSE` should be added to the `computeCommunProb` function.
+
+```{r run_cellchat}
+cellChat <- subsetData(cellChat) # This step is necessary even if using the whole database
+cellChat <- identifyOverExpressedGenes(cellChat)
+cellChat <- identifyOverExpressedInteractions(cellChat, variable.both = FALSE)
+
+# project gene expression data onto PPI (Optional: when running it, USER should set `raw.use = FALSE` in the function `computeCommunProb()` in order to use the projected data)
+#cellChat <- smoothData(cellChat, adj = PPI.mouse)
+```
+
+CellChat offers two options for calculating ligand-receptor pairs, `triMean` which produces fewer but stronger interactions, and `truncatedMean` to identify weaker signaling. We use our chosen option in `computeCommunProb` to run the calculation. This function can take several hours to run, especially if using a personal computer instead of sever cluster. Thankfully, a progress bar is conveniently displayed.
+
+After our list is obtained, we filter out groups that have only a few cells on which to predict communication with `filterCommunication`. Next, `computeCommunProbPathway` will use the ligand-receptor interactions to calculate the communication probability on a signaling pathway and can then aggregate an entire communication network using `aggregateNet`. As the previous step takes a significant amount of time, it is best to save our analysis as an rds file.
+
+```{r infer_network}
+cellChat <- computeCommunProb(cellChat, type = "triMean", distance.use = TRUE,
+                              interaction.range = 250, scale.distance = 0.01,
+                              contact.dependent = TRUE, contact.range = 84)
+cellChat <- filterCommunication(cellChat, min.cells = 10)
+cellChat <- computeCommunProbPathway(cellChat)
+cellChat <- aggregateNet(cellChat)
+
+# That took a long time. Let's save this object for easy laoding later!
+saveRDS(cellChat, file = "datasets/cellchat_visium_mouse_cortex.rds")
+```
+
+## Visualization
+
+There are many figures and graphs that can be created for CCC analysis. First, using `netVisual-circle`, we can view communications between each cell group of cells from the clustering step. The vertex and line weights can be set to a number of parameters, including the number of interactions and the strength of the interactions (Figure 7a and b). The same information can alternatively be viewed as heatmaps using “netVisual_heatmap” (Figure 7c and d).
+
+```{r vis_full}
+cellChat <- readRDS("datasets/cellchat_visium_mouse_cortex.rds")
+
+# These aren't ggplot objects so we have to save them a bit differently
+png(filename = paste0("Figure_ccc_", fig_num, ".png"), width = two_panel*2, height = two_panel*2, units = "in", res = 300)
+par(mfrow = c(1,1), xpd=TRUE)
+count_plot <- netVisual_circle(cellChat@net$count, 
+                 vertex.weight = rowSums(cellChat@net$count),
+                 weight.scale = TRUE, label.edge= FALSE, margin = c(0,0,0,0))
+count_plot
+dev.off()
+fig_num <- fig_num + 1
+
+png(filename = paste0("Figure_ccc_", fig_num, ".png"), width = two_panel*2, height = two_panel*2, units = "in", res = 300)
+par(mfrow = c(1,1), xpd=TRUE)
+int_plot <- netVisual_circle(cellChat@net$weight, vertex.weight =
+                 rowSums(cellChat@net$weight), weight.scale = TRUE,
+                 label.edge= FALSE, margin = c(0,0,0,0))
+int_plot
+dev.off()
+fig_num <- fig_num + 1
+
+png(filename = paste0("Figure_ccc_", fig_num, "a.png"), width = two_panel*1.5, height = two_panel, units = "in", res = 300)
+par(mfrow = c(1,1), xpd=TRUE)
+count_map <- netVisual_heatmap(cellChat, measure = "count", color.heatmap = "Blues")
+count_map
+dev.off()
+fig_num <- fig_num + 1
+
+png(filename = paste0("Figure_ccc_", fig_num, "b.png"), width = two_panel*1.5, height = two_panel, units = "in", res = 300)
+par(mfrow = c(1,1), xpd=TRUE)
+weight_map <- netVisual_heatmap(cellChat, measure = "weight", color.heatmap = "Blues")
+weight_map
+dev.off()
+fig_num <- fig_num + 1
+```
+
+If we are interested in a particular signaling pathway, a list of communication probabilities is available in the CellChat object metadata. We can look at the probability of interactions between cell groups involved in the NOTCH pathway with the `netVisual_aggregate` function (Figure 8).
+
+```{r vis_path}
+# Visualize pathways
+cellChat@netP$pathways
+pathways.show <- c("NOTCH") 
+# Circle plot
+png(filename = paste0("Figure_ccc_", fig_num, ".png"), width = two_panel*1.5, height = two_panel*1.5, units = "in", res = 300)
+par(mfrow=c(1,1), xpd = TRUE) # `xpd = TRUE` should be added to show the title
+pathway <- netVisual_aggregate(cellChat, signaling = pathways.show, layout = "circle")
+pathway
+dev.off()
+fig_num <- fig_num + 1
+
+# spatial plot - This comment will not run at the moment. I am working on trying to get an answer on the CellChat github.
+#par(mfrow=c(1,1), xpd = TRUE)
+#netVisual_aggregate(cellChat, signaling = pathways.show, layout = "spatial", edge.width.max = 2, vertex.size.max = 1, alpha.image = 0.2, vertex.label.cex = 3.5)
+```
+
+Finally, we can explore the "centrality" of a network. This tells us which nodes are active in the most pathways and therefore could be more "important". The calculation is done with “netAnalysis_computeCentrality” and visualized with `netAnalysis_signalingRole_network` (Figure 9).
+
+``` {r vis_network}
+# Compute the network centrality scores
+cellChat <- netAnalysis_computeCentrality(cellChat, slot.name = "netP") # the slot 'netP' means the inferred intercellular communication network of signaling pathways
+# Visualize the computed centrality scores using heatmap, allowing ready identification of major signaling roles of cell groups
+png(filename = paste0("Figure_ccc_", fig_num, ".png"), width = two_panel*2, height = two_panel, units = "in", res = 300)
+par(mfrow=c(1,1))
+cent_map <- netAnalysis_signalingRole_network(cellChat, signaling = pathways.show)
+cent_map
+dev.off()
+fig_num <- fig_num + 1
+
+# This next plot is also broken. Maybe CellChat will fix it at some point...
+# USER can show this information on the spatial transcriptomics when visualizing a signaling network, e.g., bigger circle indicates larger incoming signaling
+#par(mfrow=c(1,1))
+#netVisual_aggregate(cellChat, signaling = pathways.show, layout = "spatial", edge.width.max = 2, alpha.image = 0.2, vertex.weight = "incoming", vertex.size.max = 4, vertex.label.cex = 3.5)
+```
+
+``` {r stuff, eval = FALSE}
+# More broken CellChat stuff...
+# Take an input of a ligand-receptor pair and show expression in binary
+# spatialFeaturePlot(cellChat, pairLR.use = "IGF1_IGF1R", point.size = 1, do.binary = TRUE, cutoff = 0.05, enriched.only = F, color.heatmap = "Reds", direction = 1)
+```
+
+As we saved the CellChat object after the analysis and have not added to it since then, we do not need to save it again here.
+
+
+```{r session}
+sessionInfo()
+```
+
