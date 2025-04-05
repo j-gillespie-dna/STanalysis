@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 5 Spatially Variable Genes (SVGs) Discovery with SPARK-X | A Gentle Introduction to Spatial Transcriptomics Analysis</title>
+  <meta name="description" content="Chapter 5 Spatially Variable Genes (SVGs) Discovery with SPARK-X | A Gentle Introduction to Spatial Transcriptomics Analysis" />
+  <meta name="generator" content="bookdown 0.42 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 5 Spatially Variable Genes (SVGs) Discovery with SPARK-X | A Gentle Introduction to Spatial Transcriptomics Analysis" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 5 Spatially Variable Genes (SVGs) Discovery with SPARK-X | A Gentle Introduction to Spatial Transcriptomics Analysis" />
+  
+  
+  
+
+<meta name="author" content="Jessica Gillespie" />
+
+
+<meta name="date" content="2025-04-04" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="qc-clustering-and-annotating-with-seurat.html"/>
+<link rel="next" href="cell-cell-communication-with-cellchat.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">A Minimal Book Example</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Welcome!</a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="index.html"><a href="index.html#who-is-this-not-for"><i class="fa fa-check"></i><b>1.1</b> Who is this NOT for</a></li>
+<li class="chapter" data-level="1.2" data-path="index.html"><a href="index.html#so-who-is-this-actually-for-then"><i class="fa fa-check"></i><b>1.2</b> So who is this actually for then?</a></li>
+<li class="chapter" data-level="1.3" data-path="index.html"><a href="index.html#want-to-contribute"><i class="fa fa-check"></i><b>1.3</b> Want to contribute?</a></li>
+<li class="chapter" data-level="1.4" data-path="index.html"><a href="index.html#about-this-actual-site"><i class="fa fa-check"></i><b>1.4</b> About this actual site</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="introduction.html"><a href="introduction.html"><i class="fa fa-check"></i><b>2</b> Introduction</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="introduction.html"><a href="introduction.html#general-workflow"><i class="fa fa-check"></i><b>2.1</b> General Workflow</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="materials.html"><a href="materials.html"><i class="fa fa-check"></i><b>3</b> Materials</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="materials.html"><a href="materials.html#computer-infrastructure"><i class="fa fa-check"></i><b>3.1</b> Computer Infrastructure</a></li>
+<li class="chapter" data-level="3.2" data-path="materials.html"><a href="materials.html#software"><i class="fa fa-check"></i><b>3.2</b> Software</a></li>
+<li class="chapter" data-level="3.3" data-path="materials.html"><a href="materials.html#collect-necessary-files"><i class="fa fa-check"></i><b>3.3</b> Collect necessary files</a>
+<ul>
+<li class="chapter" data-level="3.3.1" data-path="materials.html"><a href="materials.html#space-ranger-output"><i class="fa fa-check"></i><b>3.3.1</b> Space Ranger output</a></li>
+<li class="chapter" data-level="3.3.2" data-path="materials.html"><a href="materials.html#reference-data"><i class="fa fa-check"></i><b>3.3.2</b> Reference data</a></li>
+<li class="chapter" data-level="3.3.3" data-path="materials.html"><a href="materials.html#example-datasets"><i class="fa fa-check"></i><b>3.3.3</b> Example datasets</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="qc-clustering-and-annotating-with-seurat.html"><a href="qc-clustering-and-annotating-with-seurat.html"><i class="fa fa-check"></i><b>4</b> QC, Clustering, and Annotating with Seurat</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="qc-clustering-and-annotating-with-seurat.html"><a href="qc-clustering-and-annotating-with-seurat.html#import-and-qc"><i class="fa fa-check"></i><b>4.1</b> Import and QC</a>
+<ul>
+<li class="chapter" data-level="4.1.1" data-path="qc-clustering-and-annotating-with-seurat.html"><a href="qc-clustering-and-annotating-with-seurat.html#load-in-the-data"><i class="fa fa-check"></i><b>4.1.1</b> Load in the data</a></li>
+<li class="chapter" data-level="4.1.2" data-path="qc-clustering-and-annotating-with-seurat.html"><a href="qc-clustering-and-annotating-with-seurat.html#trim-and-filter"><i class="fa fa-check"></i><b>4.1.2</b> Trim and filter</a></li>
+<li class="chapter" data-level="4.1.3" data-path="qc-clustering-and-annotating-with-seurat.html"><a href="qc-clustering-and-annotating-with-seurat.html#normalization"><i class="fa fa-check"></i><b>4.1.3</b> Normalization</a></li>
+</ul></li>
+<li class="chapter" data-level="4.2" data-path="qc-clustering-and-annotating-with-seurat.html"><a href="qc-clustering-and-annotating-with-seurat.html#visualize-gene-expression"><i class="fa fa-check"></i><b>4.2</b> Visualize Gene Expression</a></li>
+<li class="chapter" data-level="4.3" data-path="qc-clustering-and-annotating-with-seurat.html"><a href="qc-clustering-and-annotating-with-seurat.html#dimention-reduction-and-cluster"><i class="fa fa-check"></i><b>4.3</b> Dimention Reduction and Cluster</a></li>
+<li class="chapter" data-level="4.4" data-path="qc-clustering-and-annotating-with-seurat.html"><a href="qc-clustering-and-annotating-with-seurat.html#visualizing-clusters"><i class="fa fa-check"></i><b>4.4</b> Visualizing Clusters</a></li>
+<li class="chapter" data-level="4.5" data-path="qc-clustering-and-annotating-with-seurat.html"><a href="qc-clustering-and-annotating-with-seurat.html#spot-annotating"><i class="fa fa-check"></i><b>4.5</b> Spot Annotating</a></li>
+<li class="chapter" data-level="4.6" data-path="qc-clustering-and-annotating-with-seurat.html"><a href="qc-clustering-and-annotating-with-seurat.html#save-the-data"><i class="fa fa-check"></i><b>4.6</b> Save the data</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="spatially-variable-genes-svgs-discovery-with-spark-x.html"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html"><i class="fa fa-check"></i><b>5</b> Spatially Variable Genes (SVGs) Discovery with SPARK-X</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="spatially-variable-genes-svgs-discovery-with-spark-x.html"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#importing-and-preparing-data"><i class="fa fa-check"></i><b>5.1</b> Importing and Preparing Data</a></li>
+<li class="chapter" data-level="5.2" data-path="spatially-variable-genes-svgs-discovery-with-spark-x.html"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#run-spark-x"><i class="fa fa-check"></i><b>5.2</b> Run SPARK-X</a></li>
+<li class="chapter" data-level="5.3" data-path="spatially-variable-genes-svgs-discovery-with-spark-x.html"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#visualizing-svgs"><i class="fa fa-check"></i><b>5.3</b> Visualizing SVGs</a></li>
+<li class="chapter" data-level="5.4" data-path="spatially-variable-genes-svgs-discovery-with-spark-x.html"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#save-data"><i class="fa fa-check"></i><b>5.4</b> Save Data</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="cell-cell-communication-with-cellchat.html"><a href="cell-cell-communication-with-cellchat.html"><i class="fa fa-check"></i><b>6</b> Cell-Cell Communication with CellChat</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="cell-cell-communication-with-cellchat.html"><a href="cell-cell-communication-with-cellchat.html#importing-data-and-setting-computer-options"><i class="fa fa-check"></i><b>6.1</b> Importing Data and Setting Computer Options</a></li>
+<li class="chapter" data-level="6.2" data-path="cell-cell-communication-with-cellchat.html"><a href="cell-cell-communication-with-cellchat.html#preparing-cellchat-object-and-database"><i class="fa fa-check"></i><b>6.2</b> Preparing CellChat Object and Database</a></li>
+<li class="chapter" data-level="6.3" data-path="cell-cell-communication-with-cellchat.html"><a href="cell-cell-communication-with-cellchat.html#run-cellchat"><i class="fa fa-check"></i><b>6.3</b> Run CellChat</a></li>
+<li class="chapter" data-level="6.4" data-path="cell-cell-communication-with-cellchat.html"><a href="cell-cell-communication-with-cellchat.html#visualization"><i class="fa fa-check"></i><b>6.4</b> Visualization</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="future-directions-and-conclusion.html"><a href="future-directions-and-conclusion.html"><i class="fa fa-check"></i><b>7</b> Future Directions and Conclusion</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="future-directions-and-conclusion.html"><a href="future-directions-and-conclusion.html#deconvolution"><i class="fa fa-check"></i><b>7.1</b> Deconvolution</a></li>
+<li class="chapter" data-level="7.2" data-path="future-directions-and-conclusion.html"><a href="future-directions-and-conclusion.html#conclusion"><i class="fa fa-check"></i><b>7.2</b> Conclusion</a></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">A Gentle Introduction to Spatial Transcriptomics Analysis</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="spatially-variable-genes-svgs-discovery-with-spark-x" class="section level1 hasAnchor" number="5">
+<h1><span class="header-section-number">Chapter 5</span> Spatially Variable Genes (SVGs) Discovery with SPARK-X<a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#spatially-variable-genes-svgs-discovery-with-spark-x" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>Now that we know our gene expression across the sample, are there genes whose expression varies across the sample in a significant way? This information can be used to study tissue structure, assess spatially-related gene expression, and determine cell-cell communication (although we will look at this specific topic in a later section). There are again many software options for this step using a variety of methods. Some use a Gaussian model (SpatialDE, nnSVG, SOMDE) that provide good results but scale significantly with dataset size. SPARK-X uses non-parametric methods to evaluate the independence of expression of a gene with location on the tissue. This approach requires significantly less RAM, even for large datasets.</p>
+<p>When finished with this step, we will have data on which genes vary in their expression across the tissue sample and a figure to show as much.</p>
+<p>As always, we first load the necessary libraries.</p>
+<div class="sourceCode" id="cb66"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb66-1"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb66-1" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list =</span> <span class="fu">ls</span>()) <span class="co"># This clears your environment of any variables there. We do </span></span>
+<span id="cb66-2"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb66-2" tabindex="-1"></a><span class="co">#this to keep things tidy.</span></span>
+<span id="cb66-3"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb66-3" tabindex="-1"></a><span class="fu">library</span>(ggpubr)</span></code></pre></div>
+<pre><code>## Loading required package: ggplot2</code></pre>
+<div class="sourceCode" id="cb68"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb68-1"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb68-1" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb68-2"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb68-2" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code></pre></div>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<div class="sourceCode" id="cb72"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb72-1"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb72-1" tabindex="-1"></a><span class="fu">library</span>(SPARK)</span>
+<span id="cb72-2"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb72-2" tabindex="-1"></a><span class="fu">library</span>(Seurat)</span></code></pre></div>
+<pre><code>## Loading required package: SeuratObject</code></pre>
+<pre><code>## Loading required package: sp</code></pre>
+<pre><code>## &#39;SeuratObject&#39; was built under R 4.4.2 but the current version is
+## 4.4.3; it is recomended that you reinstall &#39;SeuratObject&#39; as the ABI
+## for R may have changed</code></pre>
+<pre><code>## 
+## Attaching package: &#39;SeuratObject&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, t</code></pre>
+<div class="sourceCode" id="cb78"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb78-1"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb78-1" tabindex="-1"></a><span class="co"># Easy to change variables for our project folder structure</span></span>
+<span id="cb78-2"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb78-2" tabindex="-1"></a>data_dir <span class="ot">&lt;-</span> <span class="st">&quot;datasets&quot;</span></span>
+<span id="cb78-3"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb78-3" tabindex="-1"></a>fig_dir <span class="ot">&lt;-</span> <span class="st">&quot;figures&quot;</span></span>
+<span id="cb78-4"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb78-4" tabindex="-1"></a></span>
+<span id="cb78-5"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb78-5" tabindex="-1"></a><span class="co"># This sets to the size of figures in inches</span></span>
+<span id="cb78-6"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb78-6" tabindex="-1"></a>two_panel <span class="ot">=</span> <span class="fl">3.5</span></span>
+<span id="cb78-7"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb78-7" tabindex="-1"></a>one_pnael <span class="ot">=</span> two_panel<span class="sc">/</span><span class="dv">2</span></span>
+<span id="cb78-8"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb78-8" tabindex="-1"></a><span class="co"># We can do automatic figure numbering.</span></span>
+<span id="cb78-9"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb78-9" tabindex="-1"></a>fig_num <span class="ot">=</span> <span class="dv">1</span></span></code></pre></div>
+<div id="importing-and-preparing-data" class="section level2 hasAnchor" number="5.1">
+<h2><span class="header-section-number">5.1</span> Importing and Preparing Data<a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#importing-and-preparing-data" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Using <code>readRDS</code> we can load in our saved Seurat object. Using <code>GetAssayData</code> and <code>GetTissueCoordinates</code> from Seurat, we can create two variables that contain the raw expression counts and the spatial coordinates respectively. Note if you have not yet removed mitochondrial genes, this should be performed before running this analysis.</p>
+<div class="sourceCode" id="cb79"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb79-1"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb79-1" tabindex="-1"></a>brain_ant <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">paste0</span>(data_dir,<span class="st">&quot;/cluster_mouse_brain.rds&quot;</span>))</span>
+<span id="cb79-2"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb79-2" tabindex="-1"></a>raw_counts <span class="ot">&lt;-</span> <span class="fu">GetAssayData</span>(brain_ant, <span class="at">layer =</span> <span class="st">&quot;counts&quot;</span>, <span class="at">assay =</span> <span class="st">&quot;Spatial&quot;</span>)</span>
+<span id="cb79-3"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb79-3" tabindex="-1"></a>brain_coord <span class="ot">&lt;-</span> <span class="fu">GetTissueCoordinates</span>(brain_ant)[,<span class="fu">c</span>(<span class="st">&quot;x&quot;</span>,<span class="st">&quot;y&quot;</span>)]</span></code></pre></div>
+</div>
+<div id="run-spark-x" class="section level2 hasAnchor" number="5.2">
+<h2><span class="header-section-number">5.2</span> Run SPARK-X<a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#run-spark-x" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>With a single <code>sparkx</code> command, spatial information and gene expression are used to determine which gene’s expression differs by tissue area.</p>
+<div class="sourceCode" id="cb80"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb80-1"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb80-1" tabindex="-1"></a>brain_spark <span class="ot">&lt;-</span> <span class="fu">sparkx</span>(raw_counts, brain_coord, <span class="at">option =</span> <span class="st">&#39;mixture&#39;</span>)</span></code></pre></div>
+<pre><code>## ## ===== SPARK-X INPUT INFORMATION ==== 
+## ## number of total samples: 2779 
+## ## number of total genes: 21201 
+## ## Running with single core, may take some time 
+## ## Testing With Projection Kernel
+## ## Testing With Gaussian Kernel 1
+## ## Testing With Gaussian Kernel 2
+## ## Testing With Gaussian Kernel 3
+## ## Testing With Gaussian Kernel 4
+## ## Testing With Gaussian Kernel 5
+## ## Testing With Cosine Kernel 1
+## ## Testing With Cosine Kernel 2
+## ## Testing With Cosine Kernel 3
+## ## Testing With Cosine Kernel 4
+## ## Testing With Cosine Kernel 5</code></pre>
+<pre><code>## Warning in FUN(newX[, i], ...): There are p-values that are exactly 1!</code></pre>
+</div>
+<div id="visualizing-svgs" class="section level2 hasAnchor" number="5.3">
+<h2><span class="header-section-number">5.3</span> Visualizing SVGs<a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#visualizing-svgs" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Now that we have a list of spatially variable genes, we can look at them across our tissue sample using the Seurat <code>SpatialFeaturePlot</code>. Here we look at the top 10 most significantly spatially variable genes (Figure 6).</p>
+<div class="sourceCode" id="cb83"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb83-1"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb83-1" tabindex="-1"></a>top10 <span class="ot">&lt;-</span> brain_spark<span class="sc">$</span>res_mtest <span class="sc">%&gt;%</span></span>
+<span id="cb83-2"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb83-2" tabindex="-1"></a>          <span class="fu">filter</span>(<span class="fu">between</span>(adjustedPval, <span class="dv">0</span>, <span class="fl">0.05</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb83-3"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb83-3" tabindex="-1"></a>          <span class="fu">top_n</span>(<span class="sc">-</span><span class="dv">10</span>, adjustedPval)</span>
+<span id="cb83-4"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb83-4" tabindex="-1"></a></span>
+<span id="cb83-5"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb83-5" tabindex="-1"></a>fig <span class="ot">&lt;-</span> <span class="fu">SpatialFeaturePlot</span>(brain_ant, <span class="at">features =</span> <span class="fu">c</span>(<span class="fu">rownames</span>(top10)), </span>
+<span id="cb83-6"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb83-6" tabindex="-1"></a>                           <span class="at">keep.scale =</span> <span class="st">&quot;all&quot;</span>, <span class="at">combine =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb83-7"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb83-7" tabindex="-1"></a>fig[[<span class="dv">1</span>]] <span class="ot">&lt;-</span> fig[[<span class="dv">1</span>]] <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">legend.title =</span> <span class="fu">element_blank</span>())</span>
+<span id="cb83-8"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb83-8" tabindex="-1"></a>leg <span class="ot">&lt;-</span> ggpubr<span class="sc">::</span><span class="fu">get_legend</span>(fig[[<span class="dv">1</span>]])</span>
+<span id="cb83-9"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb83-9" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(fig)) {</span>
+<span id="cb83-10"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb83-10" tabindex="-1"></a>  fig[[i]] <span class="ot">&lt;-</span> fig[[i]] <span class="sc">+</span> <span class="fu">NoLegend</span>() <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">title =</span> <span class="fu">rownames</span>(top10[i,])) <span class="sc">+</span></span>
+<span id="cb83-11"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb83-11" tabindex="-1"></a>                <span class="fu">theme</span>(<span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">&quot;Helvetica&quot;</span>))</span>
+<span id="cb83-12"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb83-12" tabindex="-1"></a>}</span>
+<span id="cb83-13"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb83-13" tabindex="-1"></a>fig_2 <span class="ot">&lt;-</span> <span class="fu">wrap_plots</span>(fig, <span class="at">ncol =</span> <span class="dv">4</span>) <span class="sc">+</span> <span class="fu">plot_spacer</span>() <span class="sc">+</span> leg</span>
+<span id="cb83-14"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb83-14" tabindex="-1"></a>fig_2</span></code></pre></div>
+<p><img src="04-SVGs_files/figure-html/SVG_plot-1.png" width="672" /></p>
+<div class="sourceCode" id="cb84"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb84-1"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb84-1" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="at">filename =</span> <span class="fu">paste0</span>(fig_dir, <span class="st">&quot;/Figure_svg_&quot;</span>, fig_num, <span class="st">&quot;.png&quot;</span>), <span class="at">plot =</span> fig_2,</span>
+<span id="cb84-2"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb84-2" tabindex="-1"></a>       <span class="at">units =</span> <span class="st">&quot;in&quot;</span>, <span class="at">width =</span> two_panel <span class="sc">*</span> (<span class="dv">7</span><span class="sc">/</span><span class="dv">4</span>), <span class="at">height =</span> two_panel, <span class="at">dpi =</span> <span class="dv">300</span>)</span>
+<span id="cb84-3"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb84-3" tabindex="-1"></a>fig_num <span class="ot">&lt;-</span> fig_num <span class="sc">+</span> <span class="dv">1</span></span></code></pre></div>
+</div>
+<div id="save-data" class="section level2 hasAnchor" number="5.4">
+<h2><span class="header-section-number">5.4</span> Save Data<a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#save-data" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>We can save our SPARK-X output to an rds file for quick loading to look at specific data or create new figures.</p>
+<div class="sourceCode" id="cb85"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb85-1"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb85-1" tabindex="-1"></a><span class="fu">saveRDS</span>(brain_spark, <span class="at">file =</span> <span class="fu">paste0</span>(data_dir, <span class="st">&quot;/svg_mouse_brain.rds&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb86"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb86-1"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#cb86-1" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div>
+<pre><code>## R version 4.4.3 (2025-02-28)
+## Platform: x86_64-pc-linux-gnu
+## Running under: Linux Mint 21
+## 
+## Matrix products: default
+## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0 
+## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0
+## 
+## locale:
+##  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+##  [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+##  [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+##  [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+## [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+## 
+## time zone: America/New_York
+## tzcode source: system (glibc)
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+## [1] Seurat_5.2.1       SeuratObject_5.0.2 sp_2.2-0           SPARK_1.1.1       
+## [5] dplyr_1.1.4        patchwork_1.3.0    ggpubr_0.6.0       ggplot2_3.5.1     
+## 
+## loaded via a namespace (and not attached):
+##   [1] RColorBrewer_1.1-3     rstudioapi_0.17.1      jsonlite_1.9.0        
+##   [4] magrittr_2.0.3         spatstat.utils_3.1-2   farver_2.1.2          
+##   [7] rmarkdown_2.29         ragg_1.3.3             vctrs_0.6.5           
+##  [10] ROCR_1.0-11            spatstat.explore_3.3-4 CompQuadForm_1.4.3    
+##  [13] rstatix_0.7.2          htmltools_0.5.8.1      broom_1.0.7           
+##  [16] Formula_1.2-5          sass_0.4.9             sctransform_0.4.1     
+##  [19] parallelly_1.42.0      pracma_2.4.4           KernSmooth_2.23-26    
+##  [22] bslib_0.9.0            htmlwidgets_1.6.4      ica_1.0-3             
+##  [25] plyr_1.8.9             plotly_4.10.4          zoo_1.8-13            
+##  [28] cachem_1.1.0           igraph_2.1.4           mime_0.12             
+##  [31] lifecycle_1.0.4        iterators_1.0.14       pkgconfig_2.0.3       
+##  [34] Matrix_1.7-2           R6_2.6.1               fastmap_1.2.0         
+##  [37] fitdistrplus_1.2-2     future_1.34.0          shiny_1.10.0          
+##  [40] digest_0.6.37          colorspace_2.1-1       tensor_1.5            
+##  [43] RSpectra_0.16-2        irlba_2.3.5.1          textshaping_1.0.0     
+##  [46] labeling_0.4.3         progressr_0.15.1       spatstat.sparse_3.1-0 
+##  [49] httr_1.4.7             polyclip_1.10-7        abind_1.4-8           
+##  [52] compiler_4.4.3         withr_3.0.2            doParallel_1.0.17     
+##  [55] backports_1.5.0        carData_3.0-5          fastDummies_1.7.5     
+##  [58] ggsignif_0.6.4         MASS_7.3-64            tools_4.4.3           
+##  [61] lmtest_0.9-40          httpuv_1.6.15          future.apply_1.11.3   
+##  [64] goftest_1.2-3          glue_1.8.0             nlme_3.1-168          
+##  [67] promises_1.3.2         grid_4.4.3             Rtsne_0.17            
+##  [70] cluster_2.1.8.1        reshape2_1.4.4         generics_0.1.3        
+##  [73] gtable_0.3.6           spatstat.data_3.1-4    tidyr_1.3.1           
+##  [76] data.table_1.17.0      car_3.1-3              spatstat.geom_3.3-5   
+##  [79] RcppAnnoy_0.0.22       ggrepel_0.9.6          RANN_2.6.2            
+##  [82] foreach_1.5.2          pillar_1.10.1          stringr_1.5.1         
+##  [85] spam_2.11-1            RcppHNSW_0.6.0         later_1.4.1           
+##  [88] splines_4.4.3          lattice_0.22-5         survival_3.8-3        
+##  [91] deldir_2.0-4           tidyselect_1.2.1       miniUI_0.1.1.1        
+##  [94] pbapply_1.7-2          knitr_1.49             gridExtra_2.3         
+##  [97] bookdown_0.42          scattermore_1.2        xfun_0.51             
+## [100] matrixStats_1.5.0      stringi_1.8.4          lazyeval_0.2.2        
+## [103] yaml_2.3.10            evaluate_1.0.3         codetools_0.2-19      
+## [106] tibble_3.2.1           cli_3.6.4              uwot_0.2.3            
+## [109] matlab_1.0.4.1         systemfonts_1.2.1      xtable_1.8-4          
+## [112] reticulate_1.41.0      munsell_0.5.1          jquerylib_0.1.4       
+## [115] Rcpp_1.0.14            globals_0.16.3         spatstat.random_3.3-2 
+## [118] png_0.1-8              spatstat.univar_3.1-1  parallel_4.4.3        
+## [121] dotCall64_1.2          listenv_0.9.1          viridisLite_0.4.2     
+## [124] scales_1.3.0           ggridges_0.5.6         purrr_1.0.4           
+## [127] rlang_1.1.5            cowplot_1.1.3</code></pre>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="qc-clustering-and-annotating-with-seurat.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="cell-cell-communication-with-cellchat.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+  "sharing": {
+    "github": false,
+    "facebook": true,
+    "twitter": true,
+    "linkedin": false,
+    "weibo": false,
+    "instapaper": false,
+    "vk": false,
+    "whatsapp": false,
+    "all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+  },
+  "fontsettings": {
+    "theme": "white",
+    "family": "sans",
+    "size": 2
+  },
+  "edit": {
+    "link": "https://github.com/USERNAME/REPO/edit/BRANCH/04-SVGs.Rmd",
+    "text": "Edit"
+  },
+  "history": {
+    "link": null,
+    "text": null
+  },
+  "view": {
+    "link": null,
+    "text": null
+  },
+  "download": ["_main.pdf", "_main.epub"],
+  "search": {
+    "engine": "fuse",
+    "options": null
+  },
+  "toc": {
+    "collapse": "subsection"
+  }
+});
+});
+</script>
+
+</body>
+
+</html>

@@ -1,8 +1,6 @@
 # Materials
 
-``` {r set_options, echo = FALSE}
-# This is a place to put any global options for creating this document
-```
+
 
 ## Computer Infrastructure
 
@@ -35,6 +33,39 @@ In order to mark cell types, we need to compare gene expression to that of alrea
 **To follow along with this tutorial**
 After clicking the link, scroll down on the page and click on "Output and supplemental files". Download the "Feature / barcode matrix HDF5 (filtered)" and place it in the `datasets` folder. Also download the "Spatial imagine data", a compressed folder named "V1_Mouse_Brain_Sagittal_Anterior_Section_2_spatial.tar.gz" into the `dtasets` folder. Extracting this should give you a folder named `spatial` with various files inside. Leave this as is for now.
 
-```{r session}
+
+``` r
 sessionInfo()
+```
+
+```
+## R version 4.4.3 (2025-02-28)
+## Platform: x86_64-pc-linux-gnu
+## Running under: Linux Mint 21
+## 
+## Matrix products: default
+## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0 
+## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0
+## 
+## locale:
+##  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+##  [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+##  [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+##  [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+## [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+## 
+## time zone: America/New_York
+## tzcode source: system (glibc)
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## loaded via a namespace (and not attached):
+##  [1] digest_0.6.37     R6_2.6.1          bookdown_0.42     fastmap_1.2.0    
+##  [5] xfun_0.51         cachem_1.1.0      knitr_1.49        htmltools_0.5.8.1
+##  [9] rmarkdown_2.29    lifecycle_1.0.4   cli_3.6.4         sass_0.4.9       
+## [13] jquerylib_0.1.4   compiler_4.4.3    rstudioapi_0.17.1 tools_4.4.3      
+## [17] evaluate_1.0.3    bslib_0.9.0       yaml_2.3.10       jsonlite_1.9.0   
+## [21] rlang_1.1.5
 ```

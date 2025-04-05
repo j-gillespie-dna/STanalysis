@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 4 QC, Clustering, and Annotating with Seurat | A Gentle Introduction to Spatial Transcriptomics Analysis</title>
+  <meta name="description" content="Chapter 4 QC, Clustering, and Annotating with Seurat | A Gentle Introduction to Spatial Transcriptomics Analysis" />
+  <meta name="generator" content="bookdown 0.42 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 4 QC, Clustering, and Annotating with Seurat | A Gentle Introduction to Spatial Transcriptomics Analysis" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 4 QC, Clustering, and Annotating with Seurat | A Gentle Introduction to Spatial Transcriptomics Analysis" />
+  
+  
+  
+
+<meta name="author" content="Jessica Gillespie" />
+
+
+<meta name="date" content="2025-04-04" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="materials.html"/>
+<link rel="next" href="spatially-variable-genes-svgs-discovery-with-spark-x.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">A Minimal Book Example</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Welcome!</a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="index.html"><a href="index.html#who-is-this-not-for"><i class="fa fa-check"></i><b>1.1</b> Who is this NOT for</a></li>
+<li class="chapter" data-level="1.2" data-path="index.html"><a href="index.html#so-who-is-this-actually-for-then"><i class="fa fa-check"></i><b>1.2</b> So who is this actually for then?</a></li>
+<li class="chapter" data-level="1.3" data-path="index.html"><a href="index.html#want-to-contribute"><i class="fa fa-check"></i><b>1.3</b> Want to contribute?</a></li>
+<li class="chapter" data-level="1.4" data-path="index.html"><a href="index.html#about-this-actual-site"><i class="fa fa-check"></i><b>1.4</b> About this actual site</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="introduction.html"><a href="introduction.html"><i class="fa fa-check"></i><b>2</b> Introduction</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="introduction.html"><a href="introduction.html#general-workflow"><i class="fa fa-check"></i><b>2.1</b> General Workflow</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="materials.html"><a href="materials.html"><i class="fa fa-check"></i><b>3</b> Materials</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="materials.html"><a href="materials.html#computer-infrastructure"><i class="fa fa-check"></i><b>3.1</b> Computer Infrastructure</a></li>
+<li class="chapter" data-level="3.2" data-path="materials.html"><a href="materials.html#software"><i class="fa fa-check"></i><b>3.2</b> Software</a></li>
+<li class="chapter" data-level="3.3" data-path="materials.html"><a href="materials.html#collect-necessary-files"><i class="fa fa-check"></i><b>3.3</b> Collect necessary files</a>
+<ul>
+<li class="chapter" data-level="3.3.1" data-path="materials.html"><a href="materials.html#space-ranger-output"><i class="fa fa-check"></i><b>3.3.1</b> Space Ranger output</a></li>
+<li class="chapter" data-level="3.3.2" data-path="materials.html"><a href="materials.html#reference-data"><i class="fa fa-check"></i><b>3.3.2</b> Reference data</a></li>
+<li class="chapter" data-level="3.3.3" data-path="materials.html"><a href="materials.html#example-datasets"><i class="fa fa-check"></i><b>3.3.3</b> Example datasets</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="qc-clustering-and-annotating-with-seurat.html"><a href="qc-clustering-and-annotating-with-seurat.html"><i class="fa fa-check"></i><b>4</b> QC, Clustering, and Annotating with Seurat</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="qc-clustering-and-annotating-with-seurat.html"><a href="qc-clustering-and-annotating-with-seurat.html#import-and-qc"><i class="fa fa-check"></i><b>4.1</b> Import and QC</a>
+<ul>
+<li class="chapter" data-level="4.1.1" data-path="qc-clustering-and-annotating-with-seurat.html"><a href="qc-clustering-and-annotating-with-seurat.html#load-in-the-data"><i class="fa fa-check"></i><b>4.1.1</b> Load in the data</a></li>
+<li class="chapter" data-level="4.1.2" data-path="qc-clustering-and-annotating-with-seurat.html"><a href="qc-clustering-and-annotating-with-seurat.html#trim-and-filter"><i class="fa fa-check"></i><b>4.1.2</b> Trim and filter</a></li>
+<li class="chapter" data-level="4.1.3" data-path="qc-clustering-and-annotating-with-seurat.html"><a href="qc-clustering-and-annotating-with-seurat.html#normalization"><i class="fa fa-check"></i><b>4.1.3</b> Normalization</a></li>
+</ul></li>
+<li class="chapter" data-level="4.2" data-path="qc-clustering-and-annotating-with-seurat.html"><a href="qc-clustering-and-annotating-with-seurat.html#visualize-gene-expression"><i class="fa fa-check"></i><b>4.2</b> Visualize Gene Expression</a></li>
+<li class="chapter" data-level="4.3" data-path="qc-clustering-and-annotating-with-seurat.html"><a href="qc-clustering-and-annotating-with-seurat.html#dimention-reduction-and-cluster"><i class="fa fa-check"></i><b>4.3</b> Dimention Reduction and Cluster</a></li>
+<li class="chapter" data-level="4.4" data-path="qc-clustering-and-annotating-with-seurat.html"><a href="qc-clustering-and-annotating-with-seurat.html#visualizing-clusters"><i class="fa fa-check"></i><b>4.4</b> Visualizing Clusters</a></li>
+<li class="chapter" data-level="4.5" data-path="qc-clustering-and-annotating-with-seurat.html"><a href="qc-clustering-and-annotating-with-seurat.html#spot-annotating"><i class="fa fa-check"></i><b>4.5</b> Spot Annotating</a></li>
+<li class="chapter" data-level="4.6" data-path="qc-clustering-and-annotating-with-seurat.html"><a href="qc-clustering-and-annotating-with-seurat.html#save-the-data"><i class="fa fa-check"></i><b>4.6</b> Save the data</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="spatially-variable-genes-svgs-discovery-with-spark-x.html"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html"><i class="fa fa-check"></i><b>5</b> Spatially Variable Genes (SVGs) Discovery with SPARK-X</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="spatially-variable-genes-svgs-discovery-with-spark-x.html"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#importing-and-preparing-data"><i class="fa fa-check"></i><b>5.1</b> Importing and Preparing Data</a></li>
+<li class="chapter" data-level="5.2" data-path="spatially-variable-genes-svgs-discovery-with-spark-x.html"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#run-spark-x"><i class="fa fa-check"></i><b>5.2</b> Run SPARK-X</a></li>
+<li class="chapter" data-level="5.3" data-path="spatially-variable-genes-svgs-discovery-with-spark-x.html"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#visualizing-svgs"><i class="fa fa-check"></i><b>5.3</b> Visualizing SVGs</a></li>
+<li class="chapter" data-level="5.4" data-path="spatially-variable-genes-svgs-discovery-with-spark-x.html"><a href="spatially-variable-genes-svgs-discovery-with-spark-x.html#save-data"><i class="fa fa-check"></i><b>5.4</b> Save Data</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="cell-cell-communication-with-cellchat.html"><a href="cell-cell-communication-with-cellchat.html"><i class="fa fa-check"></i><b>6</b> Cell-Cell Communication with CellChat</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="cell-cell-communication-with-cellchat.html"><a href="cell-cell-communication-with-cellchat.html#importing-data-and-setting-computer-options"><i class="fa fa-check"></i><b>6.1</b> Importing Data and Setting Computer Options</a></li>
+<li class="chapter" data-level="6.2" data-path="cell-cell-communication-with-cellchat.html"><a href="cell-cell-communication-with-cellchat.html#preparing-cellchat-object-and-database"><i class="fa fa-check"></i><b>6.2</b> Preparing CellChat Object and Database</a></li>
+<li class="chapter" data-level="6.3" data-path="cell-cell-communication-with-cellchat.html"><a href="cell-cell-communication-with-cellchat.html#run-cellchat"><i class="fa fa-check"></i><b>6.3</b> Run CellChat</a></li>
+<li class="chapter" data-level="6.4" data-path="cell-cell-communication-with-cellchat.html"><a href="cell-cell-communication-with-cellchat.html#visualization"><i class="fa fa-check"></i><b>6.4</b> Visualization</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="future-directions-and-conclusion.html"><a href="future-directions-and-conclusion.html"><i class="fa fa-check"></i><b>7</b> Future Directions and Conclusion</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="future-directions-and-conclusion.html"><a href="future-directions-and-conclusion.html#deconvolution"><i class="fa fa-check"></i><b>7.1</b> Deconvolution</a></li>
+<li class="chapter" data-level="7.2" data-path="future-directions-and-conclusion.html"><a href="future-directions-and-conclusion.html#conclusion"><i class="fa fa-check"></i><b>7.2</b> Conclusion</a></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">A Gentle Introduction to Spatial Transcriptomics Analysis</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="qc-clustering-and-annotating-with-seurat" class="section level1 hasAnchor" number="4">
+<h1><span class="header-section-number">Chapter 4</span> QC, Clustering, and Annotating with Seurat<a href="qc-clustering-and-annotating-with-seurat.html#qc-clustering-and-annotating-with-seurat" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>First, we will import the necessary Space Ranger output and perform some QC on the gene expression data. Then the gene expression and spatial data will be used to group (cluster) cells. Finally, we will annotate the clusters by cell type.</p>
+<p>Let’s load the necessary libraries.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="qc-clustering-and-annotating-with-seurat.html#cb7-1" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list =</span> <span class="fu">ls</span>()) <span class="co"># This clears your environment of any variables there. We do </span></span>
+<span id="cb7-2"><a href="qc-clustering-and-annotating-with-seurat.html#cb7-2" tabindex="-1"></a><span class="co">#this to keep things tidy.</span></span>
+<span id="cb7-3"><a href="qc-clustering-and-annotating-with-seurat.html#cb7-3" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb7-4"><a href="qc-clustering-and-annotating-with-seurat.html#cb7-4" tabindex="-1"></a><span class="fu">library</span>(ggpubr)</span>
+<span id="cb7-5"><a href="qc-clustering-and-annotating-with-seurat.html#cb7-5" tabindex="-1"></a><span class="fu">library</span>(cowplot)</span></code></pre></div>
+<pre><code>## 
+## Attaching package: &#39;cowplot&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:ggpubr&#39;:
+## 
+##     get_legend</code></pre>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="qc-clustering-and-annotating-with-seurat.html#cb10-1" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span></code></pre></div>
+<pre><code>## 
+## Attaching package: &#39;patchwork&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:cowplot&#39;:
+## 
+##     align_plots</code></pre>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="qc-clustering-and-annotating-with-seurat.html#cb13-1" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code></pre></div>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="qc-clustering-and-annotating-with-seurat.html#cb17-1" tabindex="-1"></a><span class="fu">source</span>(<span class="st">&quot;https://raw.githubusercontent.com/IanevskiAleksandr/sc-type/master/R/sctype_wrapper.R&quot;</span>); </span>
+<span id="cb17-2"><a href="qc-clustering-and-annotating-with-seurat.html#cb17-2" tabindex="-1"></a><span class="fu">library</span>(HGNChelper)</span></code></pre></div>
+<pre><code>## Please cite our software :) 
+##  
+##  Sehyun Oh et al. HGNChelper: identification and correction of invalid gene symbols for human and mouse. F1000Research 2020, 9:1493. DOI: https://doi.org/10.12688/f1000research.28033.1 
+##  
+##  Type `citation(&#39;HGNChelper&#39;)` for a BibTeX entry.</code></pre>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="qc-clustering-and-annotating-with-seurat.html#cb19-1" tabindex="-1"></a><span class="fu">library</span>(Seurat)</span></code></pre></div>
+<pre><code>## Loading required package: SeuratObject</code></pre>
+<pre><code>## Loading required package: sp</code></pre>
+<pre><code>## &#39;SeuratObject&#39; was built under R 4.4.2 but the current version is
+## 4.4.3; it is recomended that you reinstall &#39;SeuratObject&#39; as the ABI
+## for R may have changed</code></pre>
+<pre><code>## 
+## Attaching package: &#39;SeuratObject&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, t</code></pre>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="qc-clustering-and-annotating-with-seurat.html#cb25-1" tabindex="-1"></a><span class="co"># Easy to change variables for our project folder structure</span></span>
+<span id="cb25-2"><a href="qc-clustering-and-annotating-with-seurat.html#cb25-2" tabindex="-1"></a>data_dir <span class="ot">&lt;-</span> <span class="st">&quot;datasets&quot;</span></span>
+<span id="cb25-3"><a href="qc-clustering-and-annotating-with-seurat.html#cb25-3" tabindex="-1"></a>figs_dir <span class="ot">&lt;-</span> <span class="st">&quot;figures&quot;</span></span>
+<span id="cb25-4"><a href="qc-clustering-and-annotating-with-seurat.html#cb25-4" tabindex="-1"></a></span>
+<span id="cb25-5"><a href="qc-clustering-and-annotating-with-seurat.html#cb25-5" tabindex="-1"></a><span class="co"># This sets to the size of figures in inches</span></span>
+<span id="cb25-6"><a href="qc-clustering-and-annotating-with-seurat.html#cb25-6" tabindex="-1"></a>two_panel <span class="ot">=</span> <span class="fl">3.5</span></span>
+<span id="cb25-7"><a href="qc-clustering-and-annotating-with-seurat.html#cb25-7" tabindex="-1"></a>one_pnael <span class="ot">=</span> two_panel<span class="sc">/</span><span class="dv">2</span></span>
+<span id="cb25-8"><a href="qc-clustering-and-annotating-with-seurat.html#cb25-8" tabindex="-1"></a><span class="co"># We can do automatic figure numbering. We start with 2 as the flowchart is figure 1</span></span>
+<span id="cb25-9"><a href="qc-clustering-and-annotating-with-seurat.html#cb25-9" tabindex="-1"></a>fig_num <span class="ot">=</span> <span class="dv">1</span></span></code></pre></div>
+<div id="import-and-qc" class="section level2 hasAnchor" number="4.1">
+<h2><span class="header-section-number">4.1</span> Import and QC<a href="qc-clustering-and-annotating-with-seurat.html#import-and-qc" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="load-in-the-data" class="section level3 hasAnchor" number="4.1.1">
+<h3><span class="header-section-number">4.1.1</span> Load in the data<a href="qc-clustering-and-annotating-with-seurat.html#load-in-the-data" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>A Seurat object must first be constructed from the hdf5 file and spatial folder. This object is a special data type, holding all of the information about the sample and any additional information as a result of the analyses performed here. Image data can be read from the spatial folder via the <code>Read10X_Image</code> command and stored as a variable. This variable can then be used in the <code>Load10X_Spatial</code> command along with the hdf5 filename to load the data.</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="qc-clustering-and-annotating-with-seurat.html#cb26-1" tabindex="-1"></a>mouse_h5 <span class="ot">&lt;-</span> <span class="st">&quot;V1_Mouse_Brain_Sagittal_Anterior_Section_2_filtered_feature_bc_matrix.h5&quot;</span></span>
+<span id="cb26-2"><a href="qc-clustering-and-annotating-with-seurat.html#cb26-2" tabindex="-1"></a>mouse_image <span class="ot">&lt;-</span> <span class="fu">Read10X_Image</span>(<span class="at">image.dir =</span> <span class="fu">paste0</span>(data_dir, <span class="st">&quot;/spatial&quot;</span>))</span>
+<span id="cb26-3"><a href="qc-clustering-and-annotating-with-seurat.html#cb26-3" tabindex="-1"></a>brain_ant <span class="ot">&lt;-</span> <span class="fu">Load10X_Spatial</span>(<span class="at">data.dir =</span> data_dir, <span class="at">filename =</span> mouse_h5, </span>
+<span id="cb26-4"><a href="qc-clustering-and-annotating-with-seurat.html#cb26-4" tabindex="-1"></a>                             <span class="at">assay =</span> <span class="st">&quot;Spatial&quot;</span>, <span class="at">image =</span> mouse_image)</span></code></pre></div>
+</div>
+<div id="trim-and-filter" class="section level3 hasAnchor" number="4.1.2">
+<h3><span class="header-section-number">4.1.2</span> Trim and filter<a href="qc-clustering-and-annotating-with-seurat.html#trim-and-filter" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>A few plots may be viewed for quick data exploration. The <code>VlnPlot</code> and <code>SpatialFeaturePlot</code> functions with the <code>nCount_Spatial</code> option display the distribution of spatial features in the sample. This demonstrates that molecular counts vary across the sample as a result of technical variations but also tissue type. We may want to remove feature counts that are exceptionally low or extremely high. Using the <code>PercentageFeaturesSet</code> command with a pattern matching “^mt-” (often the designation for mitochondrial RNA) and a <code>VlnPlot</code> selected for this feature allows us to visualize the percentage mitochondrial RNA counts in samples. It is suggested to eliminate cells with high amounts of mitochondrial RNA as this will contribute noise to expression data. There is no definitive rule or cutoffs for this step and largely depends on the researcher’s evaluation of the data.</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="qc-clustering-and-annotating-with-seurat.html#cb27-1" tabindex="-1"></a>brain_ant[[<span class="st">&quot;percent.mt&quot;</span>]] <span class="ot">&lt;-</span> <span class="fu">PercentageFeatureSet</span>(brain_ant, <span class="at">pattern =</span> <span class="st">&quot;^mt-&quot;</span>)</span>
+<span id="cb27-2"><a href="qc-clustering-and-annotating-with-seurat.html#cb27-2" tabindex="-1"></a>figa <span class="ot">&lt;-</span> <span class="fu">VlnPlot</span>(brain_ant, <span class="at">features =</span> <span class="st">&quot;nCount_Spatial&quot;</span>, <span class="at">pt.size =</span> <span class="fl">0.1</span>) <span class="sc">+</span> </span>
+<span id="cb27-3"><a href="qc-clustering-and-annotating-with-seurat.html#cb27-3" tabindex="-1"></a>          <span class="fu">NoLegend</span>() <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;A. Features Violin Plot&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Count&quot;</span>) <span class="sc">+</span></span>
+<span id="cb27-4"><a href="qc-clustering-and-annotating-with-seurat.html#cb27-4" tabindex="-1"></a>          <span class="fu">theme</span>(<span class="at">axis.title.x =</span> <span class="fu">element_blank</span>(), <span class="at">axis.text.x =</span> <span class="fu">element_blank</span>(), </span>
+<span id="cb27-5"><a href="qc-clustering-and-annotating-with-seurat.html#cb27-5" tabindex="-1"></a>                <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>), </span>
+<span id="cb27-6"><a href="qc-clustering-and-annotating-with-seurat.html#cb27-6" tabindex="-1"></a>                <span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">&quot;Helvetica&quot;</span>))</span></code></pre></div>
+<pre><code>## Warning: Default search for &quot;data&quot; layer in &quot;Spatial&quot; assay yielded no results;
+## utilizing &quot;counts&quot; layer instead.</code></pre>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="qc-clustering-and-annotating-with-seurat.html#cb29-1" tabindex="-1"></a>figb <span class="ot">&lt;-</span> <span class="fu">SpatialFeaturePlot</span>(brain_ant, <span class="at">features =</span> <span class="st">&quot;nCount_Spatial&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb29-2"><a href="qc-clustering-and-annotating-with-seurat.html#cb29-2" tabindex="-1"></a>          <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Features Spatial Plot&quot;</span>) <span class="sc">+</span></span>
+<span id="cb29-3"><a href="qc-clustering-and-annotating-with-seurat.html#cb29-3" tabindex="-1"></a>          <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;right&quot;</span>, <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">16</span>),</span>
+<span id="cb29-4"><a href="qc-clustering-and-annotating-with-seurat.html#cb29-4" tabindex="-1"></a>                <span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">&quot;Helvetica&quot;</span>))</span>
+<span id="cb29-5"><a href="qc-clustering-and-annotating-with-seurat.html#cb29-5" tabindex="-1"></a>figc <span class="ot">&lt;-</span> <span class="fu">VlnPlot</span>(brain_ant, <span class="at">features =</span> <span class="st">&quot;percent.mt&quot;</span>) <span class="sc">+</span> <span class="fu">NoLegend</span>() <span class="sc">+</span> </span>
+<span id="cb29-6"><a href="qc-clustering-and-annotating-with-seurat.html#cb29-6" tabindex="-1"></a>          <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;B. Percent Mitochondrial Violin Plot&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Percentage&quot;</span>) <span class="sc">+</span></span>
+<span id="cb29-7"><a href="qc-clustering-and-annotating-with-seurat.html#cb29-7" tabindex="-1"></a>          <span class="fu">theme</span>(<span class="at">axis.title.x =</span> <span class="fu">element_blank</span>(), <span class="at">axis.text.x =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb29-8"><a href="qc-clustering-and-annotating-with-seurat.html#cb29-8" tabindex="-1"></a>                <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>),</span>
+<span id="cb29-9"><a href="qc-clustering-and-annotating-with-seurat.html#cb29-9" tabindex="-1"></a>                <span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">&quot;Helvetica&quot;</span>))</span></code></pre></div>
+<pre><code>## Warning: Default search for &quot;data&quot; layer in &quot;Spatial&quot; assay yielded no results;
+## utilizing &quot;counts&quot; layer instead.</code></pre>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="qc-clustering-and-annotating-with-seurat.html#cb31-1" tabindex="-1"></a><span class="fu">wrap_plots</span>(figa, figb)</span></code></pre></div>
+<p><img src="03-Clustering_files/figure-html/feature_check-1.png" width="672" /></p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="qc-clustering-and-annotating-with-seurat.html#cb32-1" tabindex="-1"></a>figc</span></code></pre></div>
+<p><img src="03-Clustering_files/figure-html/feature_check-2.png" width="672" /></p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="qc-clustering-and-annotating-with-seurat.html#cb33-1" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="at">filename =</span> <span class="fu">paste0</span>(figs_dir, <span class="st">&quot;/Figure_clust_&quot;</span>, fig_num, <span class="st">&quot;.png&quot;</span>), <span class="at">plot =</span> <span class="fu">wrap_plots</span>(figa, figb, figc), <span class="at">units =</span> <span class="st">&quot;in&quot;</span>, <span class="at">width =</span> two_panel <span class="sc">*</span> (<span class="dv">7</span><span class="sc">/</span><span class="dv">4</span>), <span class="at">height =</span> two_panel, <span class="at">dpi =</span> <span class="dv">300</span>)</span>
+<span id="cb33-2"><a href="qc-clustering-and-annotating-with-seurat.html#cb33-2" tabindex="-1"></a>fig_num <span class="ot">=</span> fig_num <span class="sc">+</span> <span class="dv">1</span></span></code></pre></div>
+<p>Based on Figure 2, we use the <code>subset</code> function to select samples with a mitochondrial percent &lt; 30 and a feature count &lt; 50,000.</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="qc-clustering-and-annotating-with-seurat.html#cb34-1" tabindex="-1"></a>brain_ant <span class="ot">&lt;-</span> <span class="fu">subset</span>(brain_ant, </span>
+<span id="cb34-2"><a href="qc-clustering-and-annotating-with-seurat.html#cb34-2" tabindex="-1"></a>                    <span class="at">subset =</span> percent.mt <span class="sc">&lt;</span> <span class="dv">30</span> <span class="sc">&amp;</span> nCount_Spatial <span class="sc">&lt;</span> <span class="dv">50000</span>)</span></code></pre></div>
+<pre><code>## Warning: Not validating Centroids objects
+## Not validating Centroids objects</code></pre>
+<pre><code>## Warning: Not validating FOV objects
+## Not validating FOV objects
+## Not validating FOV objects
+## Not validating FOV objects
+## Not validating FOV objects
+## Not validating FOV objects</code></pre>
+<pre><code>## Warning: Not validating Seurat objects</code></pre>
+</div>
+<div id="normalization" class="section level3 hasAnchor" number="4.1.3">
+<h3><span class="header-section-number">4.1.3</span> Normalization<a href="qc-clustering-and-annotating-with-seurat.html#normalization" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Next we need to normalize the data using SCTransform. Normalization is a common step to remove from samples technical variation that may interfere with downstream analsysis. Many normalization methods exist, most often log normalization is used with RNA-seq. Log normalization assumes all cells have the same number of RNA molecules, which is often far from the case and would therefore require more steps to account for this assumption. Seurat has its own method called <code>SCTransform</code> which combines the normalization and correction steps into a single command.</p>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="qc-clustering-and-annotating-with-seurat.html#cb38-1" tabindex="-1"></a>brain_ant <span class="ot">&lt;-</span> <span class="fu">SCTransform</span>(brain_ant, <span class="at">assay =</span> <span class="st">&quot;Spatial&quot;</span>, <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+</div>
+</div>
+<div id="visualize-gene-expression" class="section level2 hasAnchor" number="4.2">
+<h2><span class="header-section-number">4.2</span> Visualize Gene Expression<a href="qc-clustering-and-annotating-with-seurat.html#visualize-gene-expression" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Now that we have normalized gene expression, we can visualize this on the tissue sample image. Depending on the tissue under study and our goals, it may be interesting to pick a marker that can distinguish the anatomical structure of the sample. This plot overlays the expression of chosen genes over the provided tissue H&amp;E image. We can see that the expression is not heterogeneous for all genes. In the next section, we will use a method to find out which expressions vary significantly across the tissue.</p>
+<p>Note, these images are ggplot images and can therefore be customized using ggplot options.</p>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="qc-clustering-and-annotating-with-seurat.html#cb39-1" tabindex="-1"></a>fig <span class="ot">&lt;-</span> <span class="fu">SpatialFeaturePlot</span>(brain_ant, <span class="at">features =</span> <span class="fu">c</span>(<span class="st">&quot;Hpca&quot;</span>, <span class="st">&quot;Ttr&quot;</span>)) <span class="sc">&amp;</span></span>
+<span id="cb39-2"><a href="qc-clustering-and-annotating-with-seurat.html#cb39-2" tabindex="-1"></a>        <span class="fu">theme</span>(<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">16</span>, <span class="at">hjust =</span> <span class="st">&quot;left&quot;</span>),</span>
+<span id="cb39-3"><a href="qc-clustering-and-annotating-with-seurat.html#cb39-3" tabindex="-1"></a>                <span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">&quot;Helvetica&quot;</span>))</span>
+<span id="cb39-4"><a href="qc-clustering-and-annotating-with-seurat.html#cb39-4" tabindex="-1"></a>fig</span></code></pre></div>
+<p><img src="03-Clustering_files/figure-html/gene_exp-1.png" width="672" /></p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="qc-clustering-and-annotating-with-seurat.html#cb40-1" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="at">filename =</span> <span class="fu">paste0</span>(figs_dir, <span class="st">&quot;/Figure_clust_&quot;</span>, fig_num, <span class="st">&quot;.png&quot;</span>), <span class="at">plot =</span> fig,</span>
+<span id="cb40-2"><a href="qc-clustering-and-annotating-with-seurat.html#cb40-2" tabindex="-1"></a>       <span class="at">units =</span> <span class="st">&quot;in&quot;</span>, <span class="at">width =</span> two_panel <span class="sc">*</span> (<span class="dv">7</span><span class="sc">/</span><span class="dv">4</span>), <span class="at">height =</span> two_panel, <span class="at">dpi =</span> <span class="dv">300</span>)</span>
+<span id="cb40-3"><a href="qc-clustering-and-annotating-with-seurat.html#cb40-3" tabindex="-1"></a>fig_num <span class="ot">=</span> fig_num <span class="sc">+</span> <span class="dv">1</span></span></code></pre></div>
+</div>
+<div id="dimention-reduction-and-cluster" class="section level2 hasAnchor" number="4.3">
+<h2><span class="header-section-number">4.3</span> Dimention Reduction and Cluster<a href="qc-clustering-and-annotating-with-seurat.html#dimention-reduction-and-cluster" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>When clustering, any number of variables can be considered. However, it is not necessary to include ALL variables as some contribute very little overall or even add noise. Dimension reduction pairs down the parameter list to only those that contribute meaningfully to the analysis. This is achieved here by using <code>RunPCA</code> on the transformed data. Now we can group cells using <code>FindNeighbors</code>, <code>FindClusters</code>, and <code>RunUMAP</code>. Briefly, Seurat uses a graph-based approach to clustering starting with a K-Nearest Neighbors graph based on the PCA space, then uses a Louvian algorithm to cluster the cells before a final non-linear dimensional reduction is performed with UMAP.</p>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="qc-clustering-and-annotating-with-seurat.html#cb41-1" tabindex="-1"></a>brain_ant <span class="ot">&lt;-</span> <span class="fu">RunPCA</span>(brain_ant, <span class="at">assay =</span> <span class="st">&quot;SCT&quot;</span>, <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb41-2"><a href="qc-clustering-and-annotating-with-seurat.html#cb41-2" tabindex="-1"></a>brain_ant <span class="ot">&lt;-</span> <span class="fu">FindNeighbors</span>(brain_ant, <span class="at">reduction =</span> <span class="st">&quot;pca&quot;</span>, <span class="at">dims =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">30</span>)</span></code></pre></div>
+<pre><code>## Computing nearest neighbor graph</code></pre>
+<pre><code>## Computing SNN</code></pre>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="qc-clustering-and-annotating-with-seurat.html#cb44-1" tabindex="-1"></a>brain_ant <span class="ot">&lt;-</span> <span class="fu">FindClusters</span>(brain_ant, <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb44-2"><a href="qc-clustering-and-annotating-with-seurat.html#cb44-2" tabindex="-1"></a>brain_ant <span class="ot">&lt;-</span> <span class="fu">RunUMAP</span>(brain_ant, <span class="at">reduction =</span> <span class="st">&quot;pca&quot;</span>, <span class="at">dims =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">30</span>)</span></code></pre></div>
+<pre><code>## Warning: The default method for RunUMAP has changed from calling Python UMAP via reticulate to the R-native UWOT using the cosine metric
+## To use Python UMAP via reticulate, set umap.method to &#39;umap-learn&#39; and metric to &#39;correlation&#39;
+## This message will be shown once per session</code></pre>
+<pre><code>## 15:20:27 UMAP embedding parameters a = 0.9922 b = 1.112</code></pre>
+<pre><code>## 15:20:27 Read 2779 rows and found 30 numeric columns</code></pre>
+<pre><code>## 15:20:27 Using Annoy for neighbor search, n_neighbors = 30</code></pre>
+<pre><code>## 15:20:27 Building Annoy index with metric = cosine, n_trees = 50</code></pre>
+<pre><code>## 0%   10   20   30   40   50   60   70   80   90   100%</code></pre>
+<pre><code>## [----|----|----|----|----|----|----|----|----|----|</code></pre>
+<pre><code>## **************************************************|
+## 15:20:28 Writing NN index file to temp file /tmp/Rtmpk1thSJ/filed5dc28f900e7
+## 15:20:28 Searching Annoy index using 1 thread, search_k = 3000
+## 15:20:28 Annoy recall = 100%
+## 15:20:29 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
+## 15:20:29 Initializing from normalized Laplacian + noise (using RSpectra)
+## 15:20:29 Commencing optimization for 500 epochs, with 109402 positive edges
+## 15:20:29 Using rng type: pcg
+## 15:20:32 Optimization finished</code></pre>
+</div>
+<div id="visualizing-clusters" class="section level2 hasAnchor" number="4.4">
+<h2><span class="header-section-number">4.4</span> Visualizing Clusters<a href="qc-clustering-and-annotating-with-seurat.html#visualizing-clusters" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>There are a few options for visualization of our clusters. First, a traditional UMAP plot showing our clustering results with this <code>DimPlot</code> function (Figure 4a). <code>SpatialDimPlot</code> will show the distribution of identified clusters by overlaying them onto our tissue image. Giving <code>SpatialDimPlot</code> a few cluster identities allows us to highlight the location of selected clusters (Figure 4b).</p>
+<p>Again, these are ggplot objects that can be customized using the ggplot2 package.</p>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="qc-clustering-and-annotating-with-seurat.html#cb53-1" tabindex="-1"></a>figa <span class="ot">&lt;-</span> <span class="fu">DimPlot</span>(brain_ant, <span class="at">reduction =</span> <span class="st">&quot;umap&quot;</span>, <span class="at">label =</span> <span class="cn">TRUE</span>) <span class="sc">+</span></span>
+<span id="cb53-2"><a href="qc-clustering-and-annotating-with-seurat.html#cb53-2" tabindex="-1"></a>                <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;A&quot;</span>) <span class="sc">+</span></span>
+<span id="cb53-3"><a href="qc-clustering-and-annotating-with-seurat.html#cb53-3" tabindex="-1"></a>                <span class="fu">theme</span>(<span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">&quot;Helvetica&quot;</span>),</span>
+<span id="cb53-4"><a href="qc-clustering-and-annotating-with-seurat.html#cb53-4" tabindex="-1"></a>                      <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">&quot;plain&quot;</span>))</span>
+<span id="cb53-5"><a href="qc-clustering-and-annotating-with-seurat.html#cb53-5" tabindex="-1"></a>figb1 <span class="ot">&lt;-</span><span class="fu">SpatialDimPlot</span>(brain_ant, <span class="at">label =</span> <span class="cn">TRUE</span>, <span class="at">label.size =</span> <span class="dv">3</span>) <span class="sc">+</span> </span>
+<span id="cb53-6"><a href="qc-clustering-and-annotating-with-seurat.html#cb53-6" tabindex="-1"></a>        <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;B&quot;</span>, <span class="at">fill =</span> <span class="st">&quot;Cluster&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb53-7"><a href="qc-clustering-and-annotating-with-seurat.html#cb53-7" tabindex="-1"></a>        <span class="fu">theme</span>(<span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">&quot;Helvetica&quot;</span>)) <span class="sc">+</span> <span class="fu">NoLegend</span>()</span></code></pre></div>
+<pre><code>## Scale for fill is already present.
+## Adding another scale for fill, which will replace the existing scale.</code></pre>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="qc-clustering-and-annotating-with-seurat.html#cb55-1" tabindex="-1"></a>figb2 <span class="ot">&lt;-</span> <span class="fu">SpatialDimPlot</span>(brain_ant, </span>
+<span id="cb55-2"><a href="qc-clustering-and-annotating-with-seurat.html#cb55-2" tabindex="-1"></a>                        <span class="at">cells.highlight =</span> <span class="fu">CellsByIdentities</span>(<span class="at">object =</span> </span>
+<span id="cb55-3"><a href="qc-clustering-and-annotating-with-seurat.html#cb55-3" tabindex="-1"></a>                                        brain_ant, <span class="at">idents =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">8</span>)),</span>
+<span id="cb55-4"><a href="qc-clustering-and-annotating-with-seurat.html#cb55-4" tabindex="-1"></a>                        <span class="at">facet.highlight =</span> <span class="cn">TRUE</span>, <span class="at">ncol =</span> <span class="dv">1</span>)</span>
+<span id="cb55-5"><a href="qc-clustering-and-annotating-with-seurat.html#cb55-5" tabindex="-1"></a>figb <span class="ot">&lt;-</span> <span class="fu">wrap_plots</span>(figb1, figb2)</span>
+<span id="cb55-6"><a href="qc-clustering-and-annotating-with-seurat.html#cb55-6" tabindex="-1"></a><span class="fu">wrap_plots</span>(figa, figb)</span></code></pre></div>
+<p><img src="03-Clustering_files/figure-html/cluster_vis-1.png" width="672" /></p>
+<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="qc-clustering-and-annotating-with-seurat.html#cb56-1" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="at">filename =</span> <span class="fu">paste0</span>(figs_dir, <span class="st">&quot;/Figure_clust&quot;</span>, fig_num, <span class="st">&quot;.png&quot;</span>), <span class="at">plot =</span> <span class="fu">wrap_plots</span>(figa, figb, <span class="at">ncol =</span> <span class="dv">1</span>),</span>
+<span id="cb56-2"><a href="qc-clustering-and-annotating-with-seurat.html#cb56-2" tabindex="-1"></a>       <span class="at">units =</span> <span class="st">&quot;in&quot;</span>, <span class="at">width =</span> two_panel <span class="sc">*</span> (<span class="dv">7</span><span class="sc">/</span><span class="dv">4</span>), <span class="at">height =</span> two_panel <span class="sc">*</span> <span class="dv">2</span>, <span class="at">dpi =</span> <span class="dv">300</span>)</span>
+<span id="cb56-3"><a href="qc-clustering-and-annotating-with-seurat.html#cb56-3" tabindex="-1"></a>fig_num <span class="ot">=</span> fig_num <span class="sc">+</span> <span class="dv">1</span></span></code></pre></div>
+</div>
+<div id="spot-annotating" class="section level2 hasAnchor" number="4.5">
+<h2><span class="header-section-number">4.5</span> Spot Annotating<a href="qc-clustering-and-annotating-with-seurat.html#spot-annotating" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>A final step required is to annotate our clusters by assigning them cell types. This process is not single-cell resolution as our clusters consist of “spots” that contain several cells each (a characteristic of the 10X Visium platform used here). Deconvolution is needed to estimate individual cell types in each spot and is a separate step.</p>
+<p>While there are automated methods to do this, they are far from perfect, and the best way to annotate your samples is to have domain knowledge of markers that indicate cell types. If particular markers are known, expression can be viewed by cluster via a violin plot to assist in confirming. Several methods exist to perform this step. <code>SingleR</code> with <code>celldex</code> is a popular method. Another method is <code>Azimuth</code>. Here, we will use Sc-Type. The <code>run_sctype</code> function has built-in references if we provide “Brain” as the tissue type. Note that this reference is currently only for human tissue so the match will not be perfect for our data here. We can then show the new cluster assignments using <code>DimPlot</code> and <code>SpatialDimPlot</code> (Figure 5).</p>
+<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb57-1"><a href="qc-clustering-and-annotating-with-seurat.html#cb57-1" tabindex="-1"></a>brain_ant <span class="ot">&lt;-</span> <span class="fu">run_sctype</span>(brain_ant, <span class="at">assay =</span> <span class="st">&quot;SCT&quot;</span>, <span class="at">scaled =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb57-2"><a href="qc-clustering-and-annotating-with-seurat.html#cb57-2" tabindex="-1"></a>                     <span class="at">known_tissue_type=</span><span class="st">&quot;Brain&quot;</span>, <span class="at">name=</span><span class="st">&quot;sctype_classification&quot;</span>)</span></code></pre></div>
+<pre><code>## [1] &quot;Using Seurat v4 object&quot;
+## [1] &quot;New metadata added:  sctype_classification&quot;</code></pre>
+<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb59-1"><a href="qc-clustering-and-annotating-with-seurat.html#cb59-1" tabindex="-1"></a>figa <span class="ot">&lt;-</span> <span class="fu">DimPlot</span>(brain_ant, <span class="at">group.by =</span> <span class="st">&quot;sctype_classification&quot;</span>, <span class="at">pt.size =</span> .<span class="dv">25</span>) <span class="sc">+</span> </span>
+<span id="cb59-2"><a href="qc-clustering-and-annotating-with-seurat.html#cb59-2" tabindex="-1"></a>                <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;&quot;</span>) <span class="sc">+</span></span>
+<span id="cb59-3"><a href="qc-clustering-and-annotating-with-seurat.html#cb59-3" tabindex="-1"></a>                <span class="fu">theme</span>(<span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">&quot;Helvetica&quot;</span>, <span class="at">size =</span> <span class="dv">10</span>), </span>
+<span id="cb59-4"><a href="qc-clustering-and-annotating-with-seurat.html#cb59-4" tabindex="-1"></a>                       <span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>, </span>
+<span id="cb59-5"><a href="qc-clustering-and-annotating-with-seurat.html#cb59-5" tabindex="-1"></a>                       <span class="at">legend.key.spacing.x =</span> <span class="fu">unit</span>(<span class="fl">0.25</span>, <span class="st">&quot;cm&quot;</span>),</span>
+<span id="cb59-6"><a href="qc-clustering-and-annotating-with-seurat.html#cb59-6" tabindex="-1"></a>                       <span class="at">legend.key.spacing.y =</span> <span class="fu">unit</span>(<span class="fl">0.05</span>, <span class="st">&quot;cm&quot;</span>),</span>
+<span id="cb59-7"><a href="qc-clustering-and-annotating-with-seurat.html#cb59-7" tabindex="-1"></a>                       <span class="at">legend.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">8</span>)) <span class="sc">+</span></span>
+<span id="cb59-8"><a href="qc-clustering-and-annotating-with-seurat.html#cb59-8" tabindex="-1"></a>                <span class="fu">coord_fixed</span>(<span class="at">ratio =</span><span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb59-9"><a href="qc-clustering-and-annotating-with-seurat.html#cb59-9" tabindex="-1"></a>                <span class="fu">guides</span>(<span class="at">color =</span> <span class="fu">guide_legend</span>(<span class="at">nrow =</span> <span class="dv">3</span>,</span>
+<span id="cb59-10"><a href="qc-clustering-and-annotating-with-seurat.html#cb59-10" tabindex="-1"></a>                                              <span class="at">override.aes =</span> <span class="fu">list</span>(<span class="at">size =</span> <span class="dv">2</span>)))</span>
+<span id="cb59-11"><a href="qc-clustering-and-annotating-with-seurat.html#cb59-11" tabindex="-1"></a>leg <span class="ot">&lt;-</span> <span class="fu">get_legend</span>(figa)</span></code></pre></div>
+<pre><code>## Warning in get_plot_component(plot, &quot;guide-box&quot;): Multiple components found;
+## returning the first one. To return all, use `return_all = TRUE`.</code></pre>
+<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb61-1"><a href="qc-clustering-and-annotating-with-seurat.html#cb61-1" tabindex="-1"></a>figb <span class="ot">&lt;-</span> <span class="fu">SpatialDimPlot</span>(brain_ant, <span class="at">group.by=</span> <span class="st">&quot;sctype_classification&quot;</span>) <span class="sc">+</span></span>
+<span id="cb61-2"><a href="qc-clustering-and-annotating-with-seurat.html#cb61-2" tabindex="-1"></a>                        <span class="fu">NoLegend</span>() <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">plot.margin =</span> <span class="fu">margin</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>))</span>
+<span id="cb61-3"><a href="qc-clustering-and-annotating-with-seurat.html#cb61-3" tabindex="-1"></a>fig <span class="ot">&lt;-</span> <span class="fu">ggarrange</span>(figa, figb, <span class="at">nrow =</span> <span class="dv">1</span>, <span class="at">common.legend =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb61-4"><a href="qc-clustering-and-annotating-with-seurat.html#cb61-4" tabindex="-1"></a>fig</span></code></pre></div>
+<p><img src="03-Clustering_files/figure-html/annotate-1.png" width="672" /></p>
+<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb62-1"><a href="qc-clustering-and-annotating-with-seurat.html#cb62-1" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="at">filename =</span> <span class="fu">paste0</span>(figs_dir, <span class="st">&quot;/Figure_clust&quot;</span>, fig_num, <span class="st">&quot;.png&quot;</span>),</span>
+<span id="cb62-2"><a href="qc-clustering-and-annotating-with-seurat.html#cb62-2" tabindex="-1"></a>       <span class="at">plot =</span> fig, <span class="at">units =</span> <span class="st">&quot;in&quot;</span>, <span class="at">width =</span> two_panel <span class="sc">*</span> (<span class="dv">7</span><span class="sc">/</span><span class="dv">4</span>), <span class="at">height =</span> two_panel,</span>
+<span id="cb62-3"><a href="qc-clustering-and-annotating-with-seurat.html#cb62-3" tabindex="-1"></a>       <span class="at">dpi =</span> <span class="dv">300</span>)</span>
+<span id="cb62-4"><a href="qc-clustering-and-annotating-with-seurat.html#cb62-4" tabindex="-1"></a>fig_num <span class="ot">=</span> fig_num <span class="sc">+</span> <span class="dv">1</span></span></code></pre></div>
+</div>
+<div id="save-the-data" class="section level2 hasAnchor" number="4.6">
+<h2><span class="header-section-number">4.6</span> Save the data<a href="qc-clustering-and-annotating-with-seurat.html#save-the-data" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Finally, we save the Seurat object with <code>saveRDS</code>. This file can be loaded again to add other annotations or create more figures without having to repeat the analysis. This same object will also serve as the starting point in subsequent steps.</p>
+<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb63-1"><a href="qc-clustering-and-annotating-with-seurat.html#cb63-1" tabindex="-1"></a><span class="fu">saveRDS</span>(brain_ant, <span class="at">file =</span> <span class="fu">paste0</span>(data_dir, <span class="st">&quot;/cluster_mouse_brain.rds&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb64-1"><a href="qc-clustering-and-annotating-with-seurat.html#cb64-1" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div>
+<pre><code>## R version 4.4.3 (2025-02-28)
+## Platform: x86_64-pc-linux-gnu
+## Running under: Linux Mint 21
+## 
+## Matrix products: default
+## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0 
+## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0
+## 
+## locale:
+##  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+##  [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+##  [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+##  [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+## [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+## 
+## time zone: America/New_York
+## tzcode source: system (glibc)
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+## [1] Seurat_5.2.1       SeuratObject_5.0.2 sp_2.2-0           HGNChelper_0.8.15 
+## [5] dplyr_1.1.4        patchwork_1.3.0    cowplot_1.1.3      ggpubr_0.6.0      
+## [9] ggplot2_3.5.1     
+## 
+## loaded via a namespace (and not attached):
+##   [1] RcppAnnoy_0.0.22            splines_4.4.3              
+##   [3] later_1.4.1                 tibble_3.2.1               
+##   [5] polyclip_1.10-7             fastDummies_1.7.5          
+##   [7] lifecycle_1.0.4             rstatix_0.7.2              
+##   [9] globals_0.16.3              lattice_0.22-5             
+##  [11] hdf5r_1.3.12                MASS_7.3-64                
+##  [13] backports_1.5.0             magrittr_2.0.3             
+##  [15] openxlsx_4.2.8              plotly_4.10.4              
+##  [17] sass_0.4.9                  rmarkdown_2.29             
+##  [19] jquerylib_0.1.4             yaml_2.3.10                
+##  [21] httpuv_1.6.15               glmGamPoi_1.18.0           
+##  [23] sctransform_0.4.1           zip_2.3.2                  
+##  [25] spam_2.11-1                 spatstat.sparse_3.1-0      
+##  [27] reticulate_1.41.0           pbapply_1.7-2              
+##  [29] RColorBrewer_1.1-3          abind_1.4-8                
+##  [31] zlibbioc_1.52.0             Rtsne_0.17                 
+##  [33] GenomicRanges_1.58.0        purrr_1.0.4                
+##  [35] BiocGenerics_0.52.0         GenomeInfoDbData_1.2.13    
+##  [37] IRanges_2.40.1              S4Vectors_0.44.0           
+##  [39] ggrepel_0.9.6               irlba_2.3.5.1              
+##  [41] listenv_0.9.1               spatstat.utils_3.1-2       
+##  [43] goftest_1.2-3               RSpectra_0.16-2            
+##  [45] spatstat.random_3.3-2       fitdistrplus_1.2-2         
+##  [47] parallelly_1.42.0           DelayedMatrixStats_1.28.1  
+##  [49] codetools_0.2-19            DelayedArray_0.32.0        
+##  [51] tidyselect_1.2.1            UCSC.utils_1.2.0           
+##  [53] farver_2.1.2                matrixStats_1.5.0          
+##  [55] stats4_4.4.3                spatstat.explore_3.3-4     
+##  [57] jsonlite_1.9.0              progressr_0.15.1           
+##  [59] Formula_1.2-5               ggridges_0.5.6             
+##  [61] survival_3.8-3              systemfonts_1.2.1          
+##  [63] tools_4.4.3                 ragg_1.3.3                 
+##  [65] ica_1.0-3                   Rcpp_1.0.14                
+##  [67] glue_1.8.0                  SparseArray_1.6.2          
+##  [69] gridExtra_2.3               xfun_0.51                  
+##  [71] MatrixGenerics_1.18.1       GenomeInfoDb_1.42.3        
+##  [73] withr_3.0.2                 fastmap_1.2.0              
+##  [75] digest_0.6.37               R6_2.6.1                   
+##  [77] mime_0.12                   textshaping_1.0.0          
+##  [79] colorspace_2.1-1            scattermore_1.2            
+##  [81] tensor_1.5                  spatstat.data_3.1-4        
+##  [83] tidyr_1.3.1                 generics_0.1.3             
+##  [85] data.table_1.17.0           httr_1.4.7                 
+##  [87] htmlwidgets_1.6.4           S4Arrays_1.6.0             
+##  [89] uwot_0.2.3                  pkgconfig_2.0.3            
+##  [91] gtable_0.3.6                lmtest_0.9-40              
+##  [93] XVector_0.46.0              htmltools_0.5.8.1          
+##  [95] carData_3.0-5               dotCall64_1.2              
+##  [97] bookdown_0.42               scales_1.3.0               
+##  [99] Biobase_2.66.0              png_0.1-8                  
+## [101] spatstat.univar_3.1-1       knitr_1.49                 
+## [103] rstudioapi_0.17.1           reshape2_1.4.4             
+## [105] nlme_3.1-168                cachem_1.1.0               
+## [107] zoo_1.8-13                  stringr_1.5.1              
+## [109] KernSmooth_2.23-26          parallel_4.4.3             
+## [111] miniUI_0.1.1.1              pillar_1.10.1              
+## [113] grid_4.4.3                  vctrs_0.6.5                
+## [115] RANN_2.6.2                  promises_1.3.2             
+## [117] car_3.1-3                   xtable_1.8-4               
+## [119] cluster_2.1.8.1             evaluate_1.0.3             
+## [121] cli_3.6.4                   compiler_4.4.3             
+## [123] rlang_1.1.5                 crayon_1.5.3               
+## [125] future.apply_1.11.3         ggsignif_0.6.4             
+## [127] labeling_0.4.3              plyr_1.8.9                 
+## [129] stringi_1.8.4               viridisLite_0.4.2          
+## [131] deldir_2.0-4                munsell_0.5.1              
+## [133] lazyeval_0.2.2              spatstat.geom_3.3-5        
+## [135] Matrix_1.7-2                RcppHNSW_0.6.0             
+## [137] sparseMatrixStats_1.18.0    bit64_4.6.0-1              
+## [139] future_1.34.0               shiny_1.10.0               
+## [141] SummarizedExperiment_1.36.0 ROCR_1.0-11                
+## [143] igraph_2.1.4                broom_1.0.7                
+## [145] bslib_0.9.0                 bit_4.5.0.1                
+## [147] splitstackshape_1.4.8</code></pre>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="materials.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="spatially-variable-genes-svgs-discovery-with-spark-x.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+  "sharing": {
+    "github": false,
+    "facebook": true,
+    "twitter": true,
+    "linkedin": false,
+    "weibo": false,
+    "instapaper": false,
+    "vk": false,
+    "whatsapp": false,
+    "all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+  },
+  "fontsettings": {
+    "theme": "white",
+    "family": "sans",
+    "size": 2
+  },
+  "edit": {
+    "link": "https://github.com/USERNAME/REPO/edit/BRANCH/03-Clustering.Rmd",
+    "text": "Edit"
+  },
+  "history": {
+    "link": null,
+    "text": null
+  },
+  "view": {
+    "link": null,
+    "text": null
+  },
+  "download": ["_main.pdf", "_main.epub"],
+  "search": {
+    "engine": "fuse",
+    "options": null
+  },
+  "toc": {
+    "collapse": "subsection"
+  }
+});
+});
+</script>
+
+</body>
+
+</html>

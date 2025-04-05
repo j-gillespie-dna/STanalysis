@@ -1,16 +1,14 @@
 ---
 title: "A Gentle Introduction to Spatial Transcriptomics Analysis"
 author: "Jessica Gillespie"
-date: "`r Sys.Date()`"
+date: "2025-04-04"
 site: bookdown::bookdown_site
 documentclass: book
 link-citations: yes
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+
 
 # Welcome!
 Future home of a simple, (hopefully) easy to understand spatial transcriptomics analysis pipeline for those who have never before done ST analysis.
@@ -36,6 +34,39 @@ These pages are all written in R using a package called [Bookdown](https://bookd
 
 At the bottom of every chapter, you will see output from `sessionInfo()`. This is a command in R that prints a list of current R environment infomration as well as packages that were loaded at the time of creating this page. While it is not necessary if you are creating simple webpages like this one, it is provided as part of the protocol as it can be useful in troubleshooting.
 
-``` {r session_index}
+
+``` r
 sessionInfo()
+```
+
+```
+## R version 4.4.3 (2025-02-28)
+## Platform: x86_64-pc-linux-gnu
+## Running under: Linux Mint 21
+## 
+## Matrix products: default
+## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0 
+## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0
+## 
+## locale:
+##  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+##  [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+##  [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+##  [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+## [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+## 
+## time zone: America/New_York
+## tzcode source: system (glibc)
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## loaded via a namespace (and not attached):
+##  [1] digest_0.6.37     R6_2.6.1          bookdown_0.42     fastmap_1.2.0    
+##  [5] xfun_0.51         cachem_1.1.0      knitr_1.49        htmltools_0.5.8.1
+##  [9] rmarkdown_2.29    lifecycle_1.0.4   cli_3.6.4         sass_0.4.9       
+## [13] jquerylib_0.1.4   compiler_4.4.3    rstudioapi_0.17.1 tools_4.4.3      
+## [17] evaluate_1.0.3    bslib_0.9.0       yaml_2.3.10       jsonlite_1.9.0   
+## [21] rlang_1.1.5
 ```
