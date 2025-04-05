@@ -1,7 +1,7 @@
 # QC, Clustering, and Annotating with Seurat
 
-``` {r set_options, echo = FALSE}
-# This is a place to put any global options for creating this document
+``` {r set_options, include = FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 ```
 
 First, we will import the necessary Space Ranger output and perform some QC on the gene expression data. Then the gene expression and spatial data will be used to group (cluster) cells. Finally, we will annotate the clusters by cell type.
@@ -106,7 +106,7 @@ fig_num = fig_num + 1
 
 When clustering, any number of variables can be considered. However, it is not necessary to include ALL variables as some contribute very little overall or even add noise. Dimension reduction pairs down the parameter list to only those that contribute meaningfully to the analysis. This is achieved here by using `RunPCA` on the transformed data. Now we can group cells using `FindNeighbors`, `FindClusters`, and `RunUMAP`. Briefly, Seurat uses a graph-based approach to clustering starting with a K-Nearest Neighbors graph based on the PCA space, then uses a Louvian algorithm to cluster the cells before a final non-linear dimensional reduction is performed with UMAP.
 
-```{r dim_red}
+```{r dim_red, message = TRUE}
 brain_ant <- RunPCA(brain_ant, assay = "SCT", verbose = FALSE)
 brain_ant <- FindNeighbors(brain_ant, reduction = "pca", dims = 1:30)
 brain_ant <- FindClusters(brain_ant, verbose = FALSE)
@@ -132,8 +132,8 @@ figb2 <- SpatialDimPlot(brain_ant,
                                         brain_ant, idents = c(0,8)),
                         facet.highlight = TRUE, ncol = 1)
 figb <- wrap_plots(figb1, figb2)
-wrap_plots(figa, figb)
-ggsave(filename = paste0(figs_dir, "/Figure_clust", fig_num, ".png"), plot = wrap_plots(figa, figb, ncol = 1),
+wrap_plots(figa, figb, ncol = 1)
+ggsave(filename = paste0(figs_dir, "/Figure_clust_", fig_num, ".png"), plot = wrap_plots(figa, figb, ncol = 1),
        units = "in", width = two_panel * (7/4), height = two_panel * 2, dpi = 300)
 fig_num = fig_num + 1
 ```
@@ -162,7 +162,7 @@ figb <- SpatialDimPlot(brain_ant, group.by= "sctype_classification") +
                         NoLegend() + theme(plot.margin = margin(0, 0, 0, 0))
 fig <- ggarrange(figa, figb, nrow = 1, common.legend = TRUE)
 fig
-ggsave(filename = paste0(figs_dir, "/Figure_clust", fig_num, ".png"),
+ggsave(filename = paste0(figs_dir, "/Figure_clust_", fig_num, ".png"),
        plot = fig, units = "in", width = two_panel * (7/4), height = two_panel,
        dpi = 300)
 fig_num = fig_num + 1
@@ -175,9 +175,9 @@ Finally, we save the Seurat object with `saveRDS`. This file can be loaded again
 ```{r save_data}
 saveRDS(brain_ant, file = paste0(data_dir, "/cluster_mouse_brain.rds"))
 ```
-
-
-
+<br>
+<br>
+<br>
 ```{r session}
 sessionInfo()
 ```

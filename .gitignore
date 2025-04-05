@@ -1,5 +1,19 @@
 .Rproj.user
 
+.Rhistory
+
+STanalysis.Rproj
+
+*.yml
+
+*.rds
+
+*.bib
+
+*.tex
+
+*.css
+
 TODO.txt
 
 datasets/V1_Mouse_Brain_Sagittal_Anterior_Section_2_filtered_feature_bc_matrix.h5
@@ -10,3 +24,11 @@ datasets/cellchat_visium_mouse_cortex.rds
 datasets/cluster_mouse_brain.rds
 
 datasets/svg_mouse_brain.rds
+
+figures/
+
+_book/
+
+_bookdown_files/
+
+

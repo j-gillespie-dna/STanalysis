@@ -1,7 +1,7 @@
 # Welcome!
-Future home of a simple, (hopefully) easy to understand spatial transcriptomics analysis pipeline for those who have never before done ST analysis.
+This started as part of my masters thesis but has been continued as a way to provide some guidance to all of those trying to teach themselves a new NGS analysis techniques.
 
-This started as part of my masters thesis but has been continued as a way to provide some guidance to all of those trying to teach themselves a new NGS analysis techniques. The first version of this protocol will soon be published (pending link).
+These pages are all written in R using a package called [Bookdown](https://bookdown.org/) which allows you to write R scripts that can then be converted into html files. These files can then be uploaded to GitHub and published via GitPages. The R files are available for download on GitHub if you want a "behind the scenes" view of these pages or you want to run them without copy/pasting code from these pages. The corresponding site can be found [here](https://j-gillespie-dna.github.io)
 
 ## Who is this NOT for
 This protocol is not for anyone with extensive ST analysis experience. We will not be discussing intricate details or highly technical aspects beyond general notes to new users or "tips and tricks".
@@ -16,7 +16,5 @@ The world of ST analysis is ever changing and constantly expanding. There is no 
 
 There are several plans for the expansion of this protocol and they will be implemented as time allows. However, I hope you find this project helpful and informative in its current state.
 
-## About this actual site
-These pages are all written in R using a package called [Bookdown](https://bookdown.org/). This package allows you to write R scripts that can then be converted into html files. These files can then be uploaded to GitHub and published via GitPages. The R files are available for download on GitHub if you want a "behind the scenes" view of these pages or you want to run them without copy/pasting code from these pages.
 
 -J

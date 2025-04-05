@@ -12,11 +12,11 @@ As R will be the main working environment any operating system capable of runnin
 
 R is the coding environment in which the analysis will take place. R can be run via the command-line or used in the RStudio GUI. Packages can then be installed from within R. Version numbers used in this protocol are provided but these specific versions are not mandatory.
 
-[R (v4.4.2)](https://www.r-project.org/)
-[RStudio (RStudio 2024.12.0+467 "Kousa Dogwood")](https://posit.co/downloads/)
-[Seurat5 (v5.2.0)](https://satijalab.org/seurat/)
-[SPARK-X6](https://xzhoulab.github.io/SPARK/)
-[CellChat7 (v2.1.0)](https://github.com/jinworks/CellChat)
+- [R (v4.4.2)](https://www.r-project.org/)
+- [RStudio (RStudio 2024.12.0+467 "Kousa Dogwood")](https://posit.co/downloads/)
+- [Seurat5 (v5.2.0)](https://satijalab.org/seurat/)
+- [SPARK-X6](https://xzhoulab.github.io/SPARK/)
+- [CellChat7 (v2.1.0)](https://github.com/jinworks/CellChat)
 
 ## Collect necessary files
 
@@ -32,9 +32,11 @@ In order to mark cell types, we need to compare gene expression to that of alrea
 
 10X Genomics has freely available many datasets produced with their technology for users to download and analyze. These are useful for practice and learning. A mouse anterior brain dataset will be used in this chapter and is available [here](https://www.10xgenomics.com/datasets/mouse-brain-serial-section-2-sagittal-anterior-1-standard). NOTE: If you click this link from an institution's network you will be asked to sign up for an account. However, if you click this link from a home network, you won't have to provide an email to download a free dataset.
 
-**To follow along with this tutorial**
+**To follow along with this tutorial** <br>
 After clicking the link, scroll down on the page and click on "Output and supplemental files". Download the "Feature / barcode matrix HDF5 (filtered)" and place it in the `datasets` folder. Also download the "Spatial imagine data", a compressed folder named "V1_Mouse_Brain_Sagittal_Anterior_Section_2_spatial.tar.gz" into the `dtasets` folder. Extracting this should give you a folder named `spatial` with various files inside. Leave this as is for now.
-
+<br>
+<br>
+<br>
 ```{r session}
 sessionInfo()
 ```

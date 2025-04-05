@@ -1,7 +1,7 @@
 # Cell-Cell Communication with CellChat
 
-``` {r set_options, echo = FALSE}
-# This is a place to put any global options for creating this document
+``` {r set_options, include = FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 ```
 
 Cells communicate by releasing and receiving molecular messages called ligands. Ligands bind to receptors, often found on cell surfaces. This binding then activates a reaction or pathway that leads to a cell function. Due to decades of research, we know which ligands typically bind to which receptors. Thanks to the scRNA-seq data for our sample we know which cells are expressing either the ligand or receptor in a canonical communication pair. As we also have spatial data available, we can use statistics to predict which cells are most likely communicating with one another based on ligand-receptor gene expression and physical distance from one another.
@@ -106,7 +106,7 @@ saveRDS(cellChat, file = paste0(data_dir, "/cellchat_visium_mouse_cortex.rds"))
 
 ## Visualization
 
-There are many figures and graphs that can be created for CCC analysis. First, using `netVisual-circle`, we can view communications between each cell group of cells from the clustering step. The vertex and line weights can be set to a number of parameters, including the number of interactions and the strength of the interactions (Figure 7a and b). The same information can alternatively be viewed as heatmaps using “netVisual_heatmap” (Figure 7c and d).
+There are many figures and graphs that can be created for CCC analysis. First, using `netVisual-circle`, we can view communications between each cell group of cells from the clustering step. The vertex and line weights can be set to a number of parameters, including the number of interactions and the strength of the interactions. The same information can alternatively be viewed as heatmaps using “netVisual_heatmap”.
 
 ```{r vis_full}
 # Remove the # from the line below to load your previous CellChat data if you don't want to rerun the whole thing!
@@ -121,6 +121,9 @@ count_plot <- netVisual_circle(cellChat@net$count,
 count_plot
 dev.off()
 fig_num <- fig_num + 1
+netVisual_circle(cellChat@net$count, 
+                 vertex.weight = rowSums(cellChat@net$count),
+                 weight.scale = TRUE, label.edge= FALSE, margin = c(0,0,0,0))
 
 png(filename = paste0(fig_dir, "/Figure_ccc_", fig_num, ".png"), width = two_panel*2, height = two_panel*2, units = "in", res = 300)
 par(mfrow = c(1,1), xpd=TRUE)
@@ -130,20 +133,25 @@ int_plot <- netVisual_circle(cellChat@net$weight, vertex.weight =
 int_plot
 dev.off()
 fig_num <- fig_num + 1
+netVisual_circle(cellChat@net$weight, vertex.weight =
+                 rowSums(cellChat@net$weight), weight.scale = TRUE,
+                 label.edge= FALSE, margin = c(0,0,0,0))
 
-png(filename = paste0(fig_dir, "/Figure_ccc_", fig_num, "a.png"), width = two_panel*1.5, height = two_panel, units = "in", res = 300)
+png(filename = paste0(fig_dir, "/Figure_ccc_", fig_num, ".png"), width = two_panel*1.5, height = two_panel, units = "in", res = 300)
 par(mfrow = c(1,1), xpd=TRUE)
 count_map <- netVisual_heatmap(cellChat, measure = "count", color.heatmap = "Blues")
 count_map
 dev.off()
 fig_num <- fig_num + 1
+netVisual_heatmap(cellChat, measure = "count", color.heatmap = "Blues")
 
-png(filename = paste0(fig_dir, "/Figure_ccc_", fig_num, "b.png"), width = two_panel*1.5, height = two_panel, units = "in", res = 300)
+png(filename = paste0(fig_dir, "/Figure_ccc_", fig_num, ".png"), width = two_panel*1.5, height = two_panel, units = "in", res = 300)
 par(mfrow = c(1,1), xpd=TRUE)
 weight_map <- netVisual_heatmap(cellChat, measure = "weight", color.heatmap = "Blues")
 weight_map
 dev.off()
 fig_num <- fig_num + 1
+netVisual_heatmap(cellChat, measure = "weight", color.heatmap = "Blues")
 ```
 
 If we are interested in a particular signaling pathway, a list of communication probabilities is available in the CellChat object metadata. We can look at the probability of interactions between cell groups involved in the NOTCH pathway with the `netVisual_aggregate` function (Figure 8).
@@ -159,7 +167,7 @@ pathway <- netVisual_aggregate(cellChat, signaling = pathways.show, layout = "ci
 pathway
 dev.off()
 fig_num <- fig_num + 1
-
+netVisual_aggregate(cellChat, signaling = pathways.show, layout = "circle")
 ```
 
 Finally, we can explore the "centrality" of a network. This tells us which nodes are active in the most pathways and therefore could be more "important". The calculation is done with “netAnalysis_computeCentrality” and visualized with `netAnalysis_signalingRole_network` (Figure 9).
@@ -174,12 +182,13 @@ cent_map <- netAnalysis_signalingRole_network(cellChat, signaling = pathways.sho
 cent_map
 dev.off()
 fig_num <- fig_num + 1
-
+netAnalysis_signalingRole_network(cellChat, signaling = pathways.show)
 ```
 
 As we saved the CellChat object after the analysis and have not added to it since then, we do not need to save it again here.
-
-
+<br>
+<br>
+<br>
 ```{r session}
 sessionInfo()
 ```

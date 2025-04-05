@@ -1,7 +1,7 @@
 # Spatially Variable Genes (SVGs) Discovery with SPARK-X
 
-``` {r set_options, echo = FALSE}
-# This is a place to put any global options for creating this document
+``` {r set_options, include = FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 ```
 
 Now that we know our gene expression across the sample, are there genes whose expression varies across the sample in a significant way? This information can be used to study tissue structure, assess spatially-related gene expression, and determine cell-cell communication (although we will look at this specific topic in a later section). There are again many software options for this step using a variety of methods. Some use a Gaussian model (SpatialDE, nnSVG, SOMDE) that provide good results but scale significantly with dataset size. SPARK-X uses non-parametric methods to evaluate the independence of expression of a gene with location on the tissue. This approach requires significantly less RAM, even for large datasets.
@@ -44,7 +44,7 @@ brain_coord <- GetTissueCoordinates(brain_ant)[,c("x","y")]
 
 With a single `sparkx` command, spatial information and gene expression are used to determine which gene’s expression differs by tissue area.
 
-```{r sparkx}
+```{r sparkx, message = TRUE}
 brain_spark <- sparkx(raw_counts, brain_coord, option = 'mixture')
 ```
 
@@ -80,8 +80,9 @@ We can save our SPARK-X output to an rds file for quick loading to look at speci
 ```{r save}
 saveRDS(brain_spark, file = paste0(data_dir, "/svg_mouse_brain.rds"))
 ```
-
-
+<br>
+<br>
+<br>
 ```{r session}
 sessionInfo()
 ```
