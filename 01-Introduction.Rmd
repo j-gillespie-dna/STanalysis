@@ -16,7 +16,7 @@ This protocol will focus on ST analysis with the three steps mentioned above. Th
 
 ## General Workflow
 
-Figure 1 shows the general workflow of this pipeline along with the software for each step. The workflow is presented linearly here although the steps after clustering may be done in any order and several are optional depending on the desired analysis.
+The figure below shows the general workflow of this pipeline along with the software for each step. The workflow is presented linearly here although the steps after clustering may be done in any order and several are optional depending on the desired analysis.
 
 ![Diagram of protocol workflow](Figure_intro_1.png)
 <br>

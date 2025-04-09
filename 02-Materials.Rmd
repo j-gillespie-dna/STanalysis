@@ -14,9 +14,9 @@ R is the coding environment in which the analysis will take place. R can be run 
 
 - [R (v4.4.2)](https://www.r-project.org/)
 - [RStudio (RStudio 2024.12.0+467 "Kousa Dogwood")](https://posit.co/downloads/)
-- [Seurat5 (v5.2.0)](https://satijalab.org/seurat/)
-- [SPARK-X6](https://xzhoulab.github.io/SPARK/)
-- [CellChat7 (v2.1.0)](https://github.com/jinworks/CellChat)
+- [Seurat (v5.2.0)](https://satijalab.org/seurat/)
+- [SPARK-X](https://xzhoulab.github.io/SPARK/)
+- [CellChat (v2.1.0)](https://github.com/jinworks/CellChat)
 
 ## Collect necessary files
 

@@ -31,7 +31,7 @@ one_pnael = two_panel/2
 fig_num = 1
 ```
 
-## Import and QC
+## Importing and QC
 
 ### Load in the data
 
@@ -71,7 +71,7 @@ ggsave(filename = paste0(figs_dir, "/Figure_clust_", fig_num, ".png"), plot = wr
 fig_num = fig_num + 1
 ```
 
-Based on Figure `r fig_num`, we use the `subset` function to select samples with a mitochondrial percent < 30 and a feature count < 50,000.
+Based on the plots above, we use the `subset` function to select samples with a mitochondrial percent < 30 and a feature count < 50,000.
 
 ```{r filter}
 brain_ant <- subset(brain_ant, 
@@ -86,7 +86,7 @@ Next we need to normalize the data using SCTransform. Normalization is a common 
 brain_ant <- SCTransform(brain_ant, assay = "Spatial", verbose = FALSE)
 ```
 
-## Visualize Gene Expression
+## Visualizing Gene Expression
 
 Now that we have normalized gene expression, we can visualize this on the tissue sample image. Depending on the tissue under study and our goals, it may be interesting to pick a marker that can distinguish the anatomical structure of the sample. This plot overlays the expression of chosen genes over the provided tissue H&E image. We can see that the expression is not heterogeneous for all genes. In the next section, we will use a method to find out which expressions vary significantly across the tissue.
 
@@ -102,7 +102,7 @@ ggsave(filename = paste0(figs_dir, "/Figure_clust_", fig_num, ".png"), plot = fi
 fig_num = fig_num + 1
 ```
 
-## Dimention Reduction and Cluster
+## Dimention Reduction and Clustering
 
 When clustering, any number of variables can be considered. However, it is not necessary to include ALL variables as some contribute very little overall or even add noise. Dimension reduction pairs down the parameter list to only those that contribute meaningfully to the analysis. This is achieved here by using `RunPCA` on the transformed data. Now we can group cells using `FindNeighbors`, `FindClusters`, and `RunUMAP`. Briefly, Seurat uses a graph-based approach to clustering starting with a K-Nearest Neighbors graph based on the PCA space, then uses a Louvian algorithm to cluster the cells before a final non-linear dimensional reduction is performed with UMAP.
 
@@ -115,7 +115,7 @@ brain_ant <- RunUMAP(brain_ant, reduction = "pca", dims = 1:30)
 
 ## Visualizing Clusters
 
-There are a few options for visualization of our clusters. First, a traditional UMAP plot showing our clustering results with this `DimPlot` function (Figure 4a). `SpatialDimPlot` will show the distribution of identified clusters by overlaying them onto our tissue image. Giving `SpatialDimPlot` a few cluster identities allows us to highlight the location of selected clusters (Figure 4b).
+There are a few options for visualization of our clusters. First, a traditional UMAP plot showing our clustering results with this `DimPlot` function. `SpatialDimPlot` will show the distribution of identified clusters by overlaying them onto our tissue image. Giving `SpatialDimPlot` a few cluster identities allows us to highlight the location of selected clusters.
 
 Again, these are ggplot objects that can be customized using the ggplot2 package.
 
@@ -142,7 +142,7 @@ fig_num = fig_num + 1
 
 A final step required is to annotate our clusters by assigning them cell types. This process is not single-cell resolution as our clusters consist of “spots” that contain several cells each (a characteristic of the 10X Visium platform used here). Deconvolution is needed to estimate individual cell types in each spot and is a separate step.
 
-While there are automated methods to do this, they are far from perfect, and the best way to annotate your samples is to have domain knowledge of markers that indicate cell types. If particular markers are known, expression can be viewed by cluster via a violin plot to assist in confirming. Several methods exist to perform this step. `SingleR` with `celldex` is a popular method. Another method is `Azimuth`. Here, we will use Sc-Type. The `run_sctype` function has built-in references if we provide “Brain” as the tissue type. Note that this reference is currently only for human tissue so the match will not be perfect for our data here. We can then show the new cluster assignments using `DimPlot` and `SpatialDimPlot` (Figure 5).
+While there are automated methods to do this, they are far from perfect, and the best way to annotate your samples is to have domain knowledge of markers that indicate cell types. If particular markers are known, expression can be viewed by cluster via a violin plot to assist in confirming. Several methods exist to perform this step. `SingleR` with `celldex` is a popular method. Another method is `Azimuth`. Here, we will use Sc-Type. The `run_sctype` function has built-in references if we provide “Brain” as the tissue type. Note that this reference is currently only for human tissue so the match will not be perfect for our data here. We can then show the new cluster assignments using `DimPlot` and `SpatialDimPlot`.
 
 ```{r annotate}
 brain_ant <- run_sctype(brain_ant, assay = "SCT", scaled = TRUE,
@@ -168,7 +168,7 @@ ggsave(filename = paste0(figs_dir, "/Figure_clust_", fig_num, ".png"),
 fig_num = fig_num + 1
 ```
 
-## Save the data
+## Saving the data
 
 Finally, we save the Seurat object with `saveRDS`. This file can be loaded again to add other annotations or create more figures without having to repeat the analysis. This same object will also serve as the starting point in subsequent steps.
 
